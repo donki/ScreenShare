@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Programa de prueba propio (como sOCWSManagerTestApp): abre una ventana con el titulo pedido sin
+    quitar el foco, emite un tono de la frecuencia pedida y se cierra. Sirve para comprobar que el
+    audio por proceso graba su tono y no el de otro, y que la grabacion automatica empieza y para sola.
+    No va en el paquete de la aplicacion.
+  -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <AssemblyName>sOCScreenShareToneApp</AssemblyName>
+    <RootNamespace>SocScreenShare.ToneApp</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NAudio.Wasapi" Version="3.1.0" />
+  </ItemGroup>
+
+</Project>

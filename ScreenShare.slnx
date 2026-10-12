@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/ScreenShare.App/ScreenShare.App.csproj" />
+    <Project Path="src/ScreenShare.Core/ScreenShare.Core.csproj" />
+    <Project Path="src/ScreenShare.Engine/ScreenShare.Engine.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/ScreenShare.Tests/ScreenShare.Tests.csproj" />
+    <Project Path="tests/ScreenShare.ToneApp/ScreenShare.ToneApp.csproj" />
+    <Project Path="tests/ScreenShare.UITests/ScreenShare.UITests.csproj" />
+  </Folder>
+</Solution>

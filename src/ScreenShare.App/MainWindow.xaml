@@ -1,0 +1,284 @@
+<Window x:Class="SocScreenShare.App.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="clr-namespace:SocScreenShare.App.Services"
+        Title="{loc:T AppTitle}"
+        Width="760" Height="900" MinWidth="560" MinHeight="560"
+        Background="{DynamicResource PageBackground}"
+        UseLayoutRounding="True" SnapsToDevicePixels="True">
+
+    <DockPanel Margin="12">
+
+        <!-- ============================ Cabecera ============================ -->
+        <!-- Solo iconos (constitucion 6.1); el nombre de cada uno va en el tooltip y en UI Automation. -->
+        <Grid DockPanel.Dock="Top" Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Image x:Name="LogoImage" Width="30" Height="30" Margin="0,0,10,0" VerticalAlignment="Center" />
+                <TextBlock Text="{loc:T AppTitle}" Style="{StaticResource CardTitle}" VerticalAlignment="Center" />
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                <Button x:Name="GuideButton" Style="{StaticResource GhostIconButton}" Content="&#xE897;" ToolTip="{loc:T ActionGuide}" AutomationProperties.Name="{loc:T ActionGuide}" Click="OnGuide" />
+                <Button x:Name="NewsButton" Style="{StaticResource GhostIconButton}" Content="&#xE734;" ToolTip="{loc:T ActionWhatsNew}" AutomationProperties.Name="{loc:T ActionWhatsNew}" Click="OnNews" />
+                <Button x:Name="LanguageButton" Style="{StaticResource GhostIconButton}" Content="&#xE8C1;" ToolTip="{loc:T LanguageTooltip}" AutomationProperties.Name="{loc:T LanguageTooltip}" Click="OnLanguage" />
+                <Button x:Name="AboutButton" Style="{StaticResource GhostIconButton}" Content="&#xE946;" ToolTip="{loc:T ActionAbout}" AutomationProperties.Name="{loc:T ActionAbout}" Click="OnAbout" />
+            </StackPanel>
+        </Grid>
+
+        <!-- ============================ Mandos de grabacion (fijos abajo) ============================ -->
+        <Border DockPanel.Dock="Bottom" Style="{StaticResource Card}" Margin="0,10,0,0" Padding="14,10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <StackPanel>
+                    <Button x:Name="RecordButton" Style="{StaticResource RecordButton}" Content="&#xE7C8;" AutomationProperties.Name="{loc:T ActionRecord}" Click="OnRecord" />
+                    <TextBlock x:Name="RecordHotkeyText" Style="{StaticResource HintText}" HorizontalAlignment="Center" Margin="0,4,0,0" TextWrapping="NoWrap" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                    <Button x:Name="PauseButton" Style="{StaticResource BigIconButton}" Content="&#xE769;" ToolTip="{loc:T ActionPause}" AutomationProperties.Name="{loc:T ActionPause}" Click="OnPause" />
+                </StackPanel>
+                <StackPanel Grid.Column="2" Margin="10,0,0,0">
+                    <Button x:Name="StopButton" Style="{StaticResource BigIconButton}" Content="&#xE71A;" AutomationProperties.Name="{loc:T ActionStop}" Click="OnStop" />
+                    <TextBlock x:Name="StopHotkeyText" Style="{StaticResource HintText}" HorizontalAlignment="Center" Margin="0,4,0,0" TextWrapping="NoWrap" />
+                </StackPanel>
+                <StackPanel Grid.Column="3" Margin="18,0,0,0" VerticalAlignment="Center">
+                    <TextBlock x:Name="TimerText" Style="{StaticResource TimerText}" Text="00:00:00" AutomationProperties.AutomationId="TimerText" />
+                    <TextBlock x:Name="StatusText" Style="{StaticResource HintText}" AutomationProperties.AutomationId="StatusText" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <StackPanel Margin="0,0,6,0">
+
+                <!-- ============================ Ultima grabacion ============================ -->
+                <Border x:Name="LastCard" Style="{StaticResource Card}" Margin="0,0,0,10" Padding="16,12" Visibility="Collapsed">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="{loc:T LastTitle}" Style="{StaticResource HintText}" />
+                            <TextBlock x:Name="LastNameText" Style="{StaticResource BodyText}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" AutomationProperties.AutomationId="LastNameText" />
+                            <TextBlock x:Name="LastInfoText" Style="{StaticResource HintText}" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Button x:Name="PlayButton" Style="{StaticResource IconButton}" Content="&#xE714;" ToolTip="{loc:T ActionPlay}" AutomationProperties.Name="{loc:T ActionPlay}" Click="OnPlay" />
+                            <Button x:Name="ShowInFolderButton" Style="{StaticResource GhostIconButton}" Content="&#xE838;" ToolTip="{loc:T ActionShowInFolder}" AutomationProperties.Name="{loc:T ActionShowInFolder}" Click="OnShowInFolder" />
+                            <Button x:Name="CopyFileButton" Style="{StaticResource GhostIconButton}" Content="&#xE8C8;" ToolTip="{loc:T ActionCopyFile}" AutomationProperties.Name="{loc:T ActionCopyFile}" Click="OnCopyFile" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- ============================ Que grabar ============================ -->
+                <Border Style="{StaticResource Card}" Margin="0,0,0,10" Padding="16,12">
+                    <StackPanel>
+                        <TextBlock Text="{loc:T TargetTitle}" Style="{StaticResource CardTitle}" Margin="0,0,0,10" />
+                        <UniformGrid Rows="1" Columns="3">
+                            <RadioButton x:Name="MonitorTile" Style="{StaticResource TargetTile}" GroupName="Target" Checked="OnTargetChecked" AutomationProperties.Name="{loc:T TargetMonitor}">
+                                <StackPanel>
+                                    <Path Style="{StaticResource LineIcon}" Data="{StaticResource GlyphScreen}" />
+                                    <TextBlock Text="{loc:T TargetMonitor}" Style="{StaticResource BodyText}" TextAlignment="Center" Margin="0,4,0,0" />
+                                </StackPanel>
+                            </RadioButton>
+                            <RadioButton x:Name="AllTile" Style="{StaticResource TargetTile}" GroupName="Target" Checked="OnTargetChecked" AutomationProperties.Name="{loc:T TargetAll}">
+                                <StackPanel>
+                                    <Path Style="{StaticResource LineIcon}" Data="{StaticResource GlyphScreens}" />
+                                    <TextBlock Text="{loc:T TargetAll}" Style="{StaticResource BodyText}" TextAlignment="Center" Margin="0,4,0,0" />
+                                </StackPanel>
+                            </RadioButton>
+                            <RadioButton x:Name="WindowTile" Style="{StaticResource TargetTile}" GroupName="Target" Margin="0" Checked="OnTargetChecked" AutomationProperties.Name="{loc:T TargetWindow}">
+                                <StackPanel>
+                                    <Path Style="{StaticResource LineIcon}" Data="{StaticResource GlyphWindow}" />
+                                    <TextBlock Text="{loc:T TargetWindow}" Style="{StaticResource BodyText}" TextAlignment="Center" Margin="0,4,0,0" />
+                                </StackPanel>
+                            </RadioButton>
+                        </UniformGrid>
+
+                        <StackPanel x:Name="MonitorPanel" Margin="0,12,0,0">
+                            <TextBlock Text="{loc:T MonitorPick}" Style="{StaticResource FieldLabel}" Margin="0,0,0,6" />
+                            <Canvas x:Name="MonitorMap" Height="120" ClipToBounds="True" />
+                            <TextBlock x:Name="MonitorLabel" Style="{StaticResource HintText}" Margin="0,6,0,0" />
+                        </StackPanel>
+
+                        <TextBlock x:Name="AllLabel" Style="{StaticResource HintText}" Margin="0,12,0,0" Visibility="Collapsed" />
+
+                        <Grid x:Name="WindowPanel" Margin="0,12,0,0" Visibility="Collapsed">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="{loc:T WindowPick}" Style="{StaticResource FieldLabel}" Margin="0,0,0,6" VerticalAlignment="Bottom" />
+                            <Button Grid.Column="1" x:Name="RefreshWindowsButton" Style="{StaticResource GhostIconButton}" Content="&#xE72C;" ToolTip="{loc:T ActionRefresh}" AutomationProperties.Name="{loc:T ActionRefresh}" Click="OnRefreshWindows" />
+                            <ListBox Grid.Row="1" Grid.ColumnSpan="2" x:Name="WindowList" Style="{StaticResource PickList}" ItemContainerStyle="{StaticResource PickItem}"
+                                     Height="170" SelectionChanged="OnWindowSelected">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Title}" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Text="{Binding Detail}" FontSize="11" Opacity="0.75" TextTrimming="CharacterEllipsis" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- ============================ Sonido ============================ -->
+                <Border Style="{StaticResource Card}" Margin="0,0,0,10" Padding="16,12">
+                    <StackPanel>
+                        <TextBlock Text="{loc:T SoundTitle}" Style="{StaticResource CardTitle}" Margin="0,0,0,6" />
+
+                        <!-- Pantallas: todo el sonido de un dispositivo de salida, el de una aplicacion o ninguno. -->
+                        <StackPanel x:Name="ScreenAudioPanel">
+                            <TextBlock Text="{loc:T SystemAudioLabel}" Style="{StaticResource FieldLabel}" />
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="10" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <ComboBox x:Name="SystemAudioCombo" Style="{StaticResource Combo}" HorizontalAlignment="Stretch" MinWidth="0" DisplayMemberPath="Text" SelectionChanged="OnSystemAudioChanged" />
+                                <ComboBox Grid.Column="2" x:Name="OutputDeviceCombo" Style="{StaticResource Combo}" HorizontalAlignment="Stretch" MinWidth="0" DisplayMemberPath="Name" SelectionChanged="OnOutputDeviceChanged" DropDownOpened="OnOutputDropDown" />
+                                <ComboBox Grid.Column="2" x:Name="AppCombo" Style="{StaticResource Combo}" HorizontalAlignment="Stretch" MinWidth="0" DisplayMemberPath="Text" SelectionChanged="OnAppChanged" DropDownOpened="OnAppDropDown" Visibility="Collapsed" />
+                            </Grid>
+                            <TextBlock x:Name="AppUnsupportedText" Style="{StaticResource HintText}" Foreground="{DynamicResource Danger}" Text="{loc:T AppAudioUnsupported}" Margin="0,6,0,0" Visibility="Collapsed" />
+                            <Grid x:Name="SystemVolumeRow" Margin="0,8,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="48" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="&#xE767;" FontFamily="{StaticResource IconFont}" FontSize="16" Foreground="{DynamicResource PrimaryText}" VerticalAlignment="Center" Margin="0,0,10,0" />
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <Slider x:Name="SystemVolumeSlider" Style="{StaticResource Volume}" ValueChanged="OnSystemVolume" AutomationProperties.Name="{loc:T SystemVolume}" />
+                                    <ProgressBar x:Name="SystemMeter" Style="{StaticResource Meter}" Margin="0,2,0,0" />
+                                </StackPanel>
+                                <TextBlock Grid.Column="2" x:Name="SystemVolumeText" Style="{StaticResource HintText}" TextAlignment="Right" VerticalAlignment="Center" />
+                            </Grid>
+                        </StackPanel>
+
+                        <!-- Ventana: solo su sonido (el de su proceso y sus hijos). -->
+                        <StackPanel x:Name="WindowAudioPanel" Visibility="Collapsed">
+                            <CheckBox x:Name="WindowAudioCheck" Style="{StaticResource Check}" Content="{loc:T WindowAudio}" Checked="OnWindowAudio" Unchecked="OnWindowAudio" />
+                            <TextBlock Text="{loc:T WindowAudioHint}" Style="{StaticResource HintText}" Margin="24,2,0,0" />
+                            <TextBlock x:Name="WindowAudioUnsupportedText" Style="{StaticResource HintText}" Foreground="{DynamicResource Danger}" Text="{loc:T AppAudioUnsupported}" Margin="24,6,0,0" Visibility="Collapsed" />
+                            <Grid Margin="0,8,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="48" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="&#xE767;" FontFamily="{StaticResource IconFont}" FontSize="16" Foreground="{DynamicResource PrimaryText}" VerticalAlignment="Center" Margin="0,0,10,0" />
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <Slider x:Name="WindowVolumeSlider" Style="{StaticResource Volume}" ValueChanged="OnWindowVolume" AutomationProperties.Name="{loc:T SystemVolume}" />
+                                    <ProgressBar x:Name="WindowMeter" Style="{StaticResource Meter}" Margin="0,2,0,0" />
+                                </StackPanel>
+                                <TextBlock Grid.Column="2" x:Name="WindowVolumeText" Style="{StaticResource HintText}" TextAlignment="Right" VerticalAlignment="Center" />
+                            </Grid>
+                        </StackPanel>
+
+                        <!-- Microfono, aparte y solo si se activa. -->
+                        <CheckBox x:Name="MicCheck" Style="{StaticResource Check}" Content="{loc:T MicLabel}" Margin="0,14,0,0" Checked="OnMic" Unchecked="OnMic" />
+                        <ComboBox x:Name="MicDeviceCombo" Style="{StaticResource Combo}" HorizontalAlignment="Stretch" MinWidth="0" Margin="0,8,0,0" DisplayMemberPath="Name" SelectionChanged="OnMicDeviceChanged" DropDownOpened="OnMicDropDown" />
+                        <Grid Margin="0,8,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="48" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="&#xE720;" FontFamily="{StaticResource IconFont}" FontSize="16" Foreground="{DynamicResource PrimaryText}" VerticalAlignment="Center" Margin="0,0,10,0" />
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <Slider x:Name="MicVolumeSlider" Style="{StaticResource Volume}" ValueChanged="OnMicVolume" AutomationProperties.Name="{loc:T MicVolume}" />
+                                <ProgressBar x:Name="MicMeter" Style="{StaticResource Meter}" Margin="0,2,0,0" />
+                            </StackPanel>
+                            <TextBlock Grid.Column="2" x:Name="MicVolumeText" Style="{StaticResource HintText}" TextAlignment="Right" VerticalAlignment="Center" />
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- ============================ Guardar ============================ -->
+                <Border Style="{StaticResource Card}" Margin="0,0,0,10" Padding="16,12">
+                    <StackPanel>
+                        <TextBlock Text="{loc:T SaveTitle}" Style="{StaticResource CardTitle}" Margin="0,0,0,6" />
+                        <TextBlock Text="{loc:T FolderLabel}" Style="{StaticResource FieldLabel}" />
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="FolderBox" Style="{StaticResource Field}" LostFocus="OnFolderLostFocus" KeyDown="OnFolderKeyDown" AutomationProperties.Name="{loc:T FolderLabel}" />
+                            <Button Grid.Column="1" x:Name="BrowseFolderButton" Style="{StaticResource IconButton}" Content="&#xE8B7;" Margin="8,0,0,0" ToolTip="{loc:T BrowseFolder}" AutomationProperties.Name="{loc:T BrowseFolder}" Click="OnBrowseFolder" />
+                            <Button Grid.Column="2" x:Name="OpenFolderButton" Style="{StaticResource GhostIconButton}" Content="&#xE838;" ToolTip="{loc:T OpenFolder}" AutomationProperties.Name="{loc:T OpenFolder}" Click="OnOpenFolder" />
+                        </Grid>
+                        <TextBlock Text="{loc:T QualityLabel}" Style="{StaticResource FieldLabel}" />
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <ComboBox x:Name="QualityCombo" Style="{StaticResource Combo}" HorizontalAlignment="Stretch" MinWidth="0" DisplayMemberPath="Text" SelectionChanged="OnQualityChanged" />
+                            <Button Grid.Column="1" x:Name="QualityButton" Style="{StaticResource GhostIconButton}" Content="&#xE9E9;" Margin="8,0,0,0" ToolTip="{loc:T QualityEdit}" AutomationProperties.Name="{loc:T QualityEdit}" Click="OnQualityOptions" />
+                        </Grid>
+                        <TextBlock x:Name="EstimateText" Style="{StaticResource HintText}" Margin="0,6,0,0" AutomationProperties.AutomationId="EstimateText" />
+                        <CheckBox x:Name="CursorCheck" Style="{StaticResource Check}" Content="{loc:T ShowCursor}" Margin="0,12,0,0" Checked="OnOptionChanged" Unchecked="OnOptionChanged" />
+                        <CheckBox x:Name="HideCheck" Style="{StaticResource Check}" Content="{loc:T HideWhileRecording}" Checked="OnOptionChanged" Unchecked="OnOptionChanged" />
+                    </StackPanel>
+                </Border>
+
+                <!-- ============================ Atajos y grabacion automatica ============================ -->
+                <Border Style="{StaticResource Card}" Padding="16,12">
+                    <StackPanel>
+                        <TextBlock Text="{loc:T ShortcutsTitle}" Style="{StaticResource CardTitle}" Margin="0,0,0,6" />
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="10" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock Text="{loc:T HotkeyStartLabel}" Style="{StaticResource FieldLabel}" />
+                                <TextBox x:Name="StartHotkeyBox" Style="{StaticResource Field}" IsReadOnly="True" IsReadOnlyCaretVisible="False" PreviewKeyDown="OnHotkeyKeyDown" AutomationProperties.Name="{loc:T HotkeyStartLabel}" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="{loc:T HotkeyStopLabel}" Style="{StaticResource FieldLabel}" />
+                                <TextBox x:Name="StopHotkeyBox" Style="{StaticResource Field}" IsReadOnly="True" IsReadOnlyCaretVisible="False" PreviewKeyDown="OnHotkeyKeyDown" AutomationProperties.Name="{loc:T HotkeyStopLabel}" />
+                            </StackPanel>
+                            <Button Grid.Column="3" x:Name="ResetHotkeysButton" Style="{StaticResource GhostIconButton}" Content="&#xE777;" VerticalAlignment="Bottom" Margin="8,0,0,0" ToolTip="{loc:T HotkeyReset}" AutomationProperties.Name="{loc:T HotkeyReset}" Click="OnResetHotkeys" />
+                        </Grid>
+                        <TextBlock x:Name="HotkeyHint" Style="{StaticResource HintText}" Text="{loc:T HotkeyHint}" Margin="0,6,0,0" />
+
+                        <Grid Margin="0,14,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <CheckBox x:Name="AutoRecordCheck" Style="{StaticResource Check}" Content="{loc:T AutoRecordLabel}" Margin="0" Checked="OnAutoRecord" Unchecked="OnAutoRecord" />
+                                <TextBlock x:Name="AutoSummaryText" Style="{StaticResource HintText}" Margin="24,2,0,0" />
+                            </StackPanel>
+                            <Button Grid.Column="1" x:Name="AutoRulesButton" Style="{StaticResource IconButton}" Content="&#xE713;" VerticalAlignment="Center" ToolTip="{loc:T AutoRulesEdit}" AutomationProperties.Name="{loc:T AutoRulesEdit}" Click="OnAutoRules" />
+                        </Grid>
+                        <CheckBox x:Name="StartupCheck" Style="{StaticResource Check}" Content="{loc:T StartupLabel}" Margin="0,12,0,0" Checked="OnStartup" Unchecked="OnStartup" />
+                        <TextBlock x:Name="StartupHint" Style="{StaticResource HintText}" Margin="24,2,0,0" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+    </DockPanel>
+</Window>

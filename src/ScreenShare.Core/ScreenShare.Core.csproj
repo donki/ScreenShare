@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Toda la logica de sOC ScreenShare que no toca el hardware: ajustes, nombres de fichero, calidad
+    (resolucion y bitrate), reloj y estados de la grabacion, conversion y mezcla de audio, conversion
+    de imagen de reserva, filtros de ventanas, linea de ordenes, atajo de teclado y textos. Es lo que
+    mide el banco de pruebas.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <RootNamespace>SocScreenShare</RootNamespace>
+    <AssemblyName>ScreenShare.Core</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="ScreenShare.Tests" />
+    <EmbeddedResource Include="whatsnew.json" LogicalName="SocScreenShare.whatsnew.json" />
+  </ItemGroup>
+
+</Project>

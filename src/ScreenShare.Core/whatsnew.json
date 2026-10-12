@@ -1,0 +1,20 @@
+[
+  {
+    "version": "2026.10.12.0",
+    "date": "2026-10-12",
+    "es": [
+      "Primera versión: graba una pantalla, todas o una ventana en MP4 listo para compartir (H.264 y AAC, ligero por defecto y con calidad alta si se quiere).",
+      "Al grabar una ventana se graba solo su sonido (también el de sus procesos auxiliares, como en los navegadores); en una pantalla, todo lo que suena por el dispositivo que elijas o solo una aplicación. El micrófono, aparte y con su volumen.",
+      "Ctrl+Mayús+F9 empieza y Ctrl+Mayús+F10 para desde cualquier sitio (se pueden cambiar); mientras graba, la ventana se aparta y el icono junto al reloj lleva un punto rojo.",
+      "Grabación automática: cuando se abre una ventana de la aplicación que elijas (y, si quieres, con un título concreto), empieza a grabarla y la guarda al cerrarse.",
+      "Calidad a medida: resolución, imágenes por segundo, tasa de bits, H.264 o HEVC y audio AAC (tasa, frecuencia, mono o estéreo), con los MB por minuto a la vista. Al terminar: reproducir, enseñar en su carpeta o copiar el vídeo."
+    ],
+    "en": [
+      "First version: records one screen, all of them or a window to an MP4 that is ready to share (H.264 and AAC, light by default and high quality if you want it).",
+      "Recording a window records only its own sound (including its helper processes, as browsers have); on a screen, everything playing on the device you choose or only one app. The microphone on top, with its own volume.",
+      "Ctrl+Shift+F9 starts and Ctrl+Shift+F10 stops from anywhere (you can change them); while recording the window steps aside and the icon next to the clock gets a red dot.",
+      "Automatic recording: when a window of the app you choose opens (and, if you want, with a given title), it is recorded and saved when it closes.",
+      "Quality your way: resolution, frames per second, bitrate, H.264 or HEVC and AAC audio (bitrate, sample rate, mono or stereo), with the MB per minute shown. When it ends: play, show in its folder or copy the video."
+    ]
+  }
+]
