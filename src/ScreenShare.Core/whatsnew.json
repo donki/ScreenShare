@@ -1,7 +1,7 @@
 [
   {
-    "version": "2026.10.12.0",
-    "date": "2026-10-12",
+    "version": "2026.10.13.0",
+    "date": "2026-10-13",
     "es": [
       "Primera versión: graba una pantalla, todas o una ventana en MP4 listo para compartir (H.264 y AAC, ligero por defecto y con calidad alta si se quiere).",
       "Al grabar una ventana se graba solo su sonido (también el de sus procesos auxiliares, como en los navegadores); en una pantalla, todo lo que suena por el dispositivo que elijas o solo una aplicación. El micrófono, aparte y con su volumen.",

@@ -1,6 +1,6 @@
 # Changelog — sOC ScreenShare
 
-## 2026.10.12.0 — Primera versión · First version
+## 2026.10.13.0 — Primera versión · First version
 
 **Español**
 

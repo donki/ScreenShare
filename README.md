@@ -6,8 +6,9 @@ sitio. Puede **grabar sola** cuando se abre la ventana de una aplicación concre
 
 ## Dónde conseguirla
 
-- Aún sin publicar (ni repositorio en GitHub ni Microsoft Store). Se compila desde este repositorio
-  (`tools\entregar.ps1 -SoloCompilar`) y el exe queda en `publish\app\sOCScreenShare.exe`.
+- **GitHub**: el exe autocontenido de cada versión en
+  [Releases](https://github.com/donki/ScreenShare/releases) (sin instalar: doble clic).
+- **Microsoft Store**: aún no.
 
 ## Qué hace
 
@@ -102,7 +103,7 @@ Decisiones:
 
 ```
 dotnet build ScreenShare.slnx -c Debug -m:1 -nodeReuse:false
-.\tools\entregar.ps1 -Version 2026.10.12.0 -SoloCompilar      # banco de pruebas + exe autocontenido en publish\app
+.\tools\entregar.ps1 -Version 2026.10.13.0 -SoloCompilar      # banco de pruebas + exe autocontenido en publish\app
 pwsh -File tools\generar-icono.ps1                             # vuelve a dibujar el icono desde assets\appicon.svg
 ```
 

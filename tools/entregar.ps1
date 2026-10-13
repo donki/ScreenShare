@@ -3,8 +3,8 @@
     Entrega de sOC ScreenShare: versión, banco de pruebas, exe autocontenido y, sin -SoloCompilar,
     OneDrive, commit, push y release de GitHub (como sOC WSManager y RC Manager).
 .DESCRIPTION
-    El CHANGELOG y src\ScreenShare.Core\whatsnew.json se escriben antes a mano. Mientras la aplicación
-    no tenga repositorio en GitHub ni nombre definitivo, se usa con -SoloCompilar.
+    El CHANGELOG y src\ScreenShare.Core\whatsnew.json se escriben antes a mano. -SoloCompilar deja
+    solo el exe en publish\app, sin OneDrive ni git.
 .EXAMPLE
     .\tools\entregar.ps1 -Version 2026.10.12.0 -SoloCompilar
 .EXAMPLE
