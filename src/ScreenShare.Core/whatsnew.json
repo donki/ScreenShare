@@ -1,5 +1,15 @@
 [
   {
+    "version": "2026.10.15.0",
+    "date": "2026-10-15",
+    "es": [
+      "La grabación automática sigue a la ventana nueva del programa: si mientras graba la misma aplicación abre otra ventana (TeamViewer abre primero la lista de conexiones y la conexión sale en otra), se pasa a grabar esa, en el mismo vídeo. Al cerrarla vuelve a la anterior y, si no queda ninguna, para y guarda."
+    ],
+    "en": [
+      "Automatic recording follows the app's new window: if, while recording, the same app opens another window (TeamViewer first opens the connection list and the connection appears in another one), it moves on to record that one, in the same video. When it closes it goes back to the previous one and, if none is left, stops and saves."
+    ]
+  },
+  {
     "version": "2026.10.13.0",
     "date": "2026-10-13",
     "es": [

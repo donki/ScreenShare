@@ -1,5 +1,23 @@
 # Changelog — sOC ScreenShare
 
+## 2026.10.15.0 — La grabación automática sigue a la ventana nueva · Automatic recording follows the new window
+
+**Español**
+
+- **La grabación automática sigue a la ventana nueva del programa**: si mientras graba la misma
+  aplicación abre otra ventana de la regla (TeamViewer abre primero la lista de conexiones y la
+  conexión sale en otra ventana), la grabación se pasa a ella **en el mismo vídeo**. Al cerrarse,
+  vuelve a la anterior si sigue abierta y, si no queda ninguna, para y guarda. Los diálogos del
+  programa no se llevan la grabación.
+
+**English**
+
+- **Automatic recording follows the app's new window**: if, while recording, the same app opens
+  another window that matches the rule (TeamViewer first opens the connection list and the connection
+  appears in a different window), the recording moves to it **in the same video**. When it closes, it
+  goes back to the previous one if it is still open and, if none is left, stops and saves. The app's
+  dialogs do not take the recording.
+
 ## 2026.10.13.0 — Primera versión · First version
 
 **Español**

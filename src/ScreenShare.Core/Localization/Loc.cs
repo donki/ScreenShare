@@ -160,7 +160,7 @@ public static class Loc
 
         // reglas de grabación automática
         ["AutoRulesTitle"] = "Automatic recording",
-        ["AutoRulesHint"] = "When a window of one of these apps opens, it is recorded.",
+        ["AutoRulesHint"] = "When a window of one of these apps opens, it is recorded. If the app opens another window while recording (TeamViewer: from the list to the connection), the recording moves to it, in the same video.",
         ["RuleAdd"] = "Add a rule",
         ["RuleDelete"] = "Remove the rule",
         ["RuleDeleteConfirm"] = "Remove this rule?",
@@ -437,7 +437,7 @@ public static class Loc
         ["StatusSaved"] = "Guardada.",
 
         ["AutoRulesTitle"] = "Grabación automática",
-        ["AutoRulesHint"] = "Cuando se abre una ventana de una de estas aplicaciones, se graba.",
+        ["AutoRulesHint"] = "Cuando se abre una ventana de una de estas aplicaciones, se graba. Si la aplicación abre otra ventana mientras graba (TeamViewer: de la lista a la conexión), la grabación se pasa a ella, en el mismo vídeo.",
         ["RuleAdd"] = "Añadir una regla",
         ["RuleDelete"] = "Quitar la regla",
         ["RuleDeleteConfirm"] = "¿Quitar esta regla?",

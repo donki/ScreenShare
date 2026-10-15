@@ -445,8 +445,8 @@ public sealed class SettingsTests : IDisposable
 
 public sealed class AutoRecordTests
 {
-    private static WindowInfo Win(string proc, string title, bool visible = true, bool tool = false, nint h = 7) =>
-        new(h, title, 1, proc, visible, false, tool, false, false, new RectI(0, 0, 800, 600));
+    private static WindowInfo Win(string proc, string title, bool visible = true, bool tool = false, nint h = 7, bool owned = false) =>
+        new(h, title, 1, proc, visible, false, tool, owned, false, new RectI(0, 0, 800, 600));
 
     private static AutoRecordRule Rule(string proc, string? title = null, TitleMatch mode = TitleMatch.Contains, bool enabled = true, bool stop = true) =>
         new() { ProcessName = proc, Title = title, TitleMode = mode, Enabled = enabled, StopOnClose = stop };
@@ -544,6 +544,55 @@ public sealed class AutoRecordTests
         Assert.Equal(7, t.CurrentWindow);   // escondida no es cerrada: sigue siendo la suya
         Assert.Equal(AutoAction.None, t.OnEvent(WindowEventKind.Destroyed, 7, null, rules, true, true).Action);
         Assert.Equal(0, t.CurrentWindow);
+    }
+
+    [Fact]
+    public void Sigue_a_la_ventana_nueva_del_programa_y_vuelve_al_cerrarse()
+    {
+        // TeamViewer: primero el selector (7), luego la conexión (8) en otra ventana.
+        var t = new AutoRecordTracker();
+        var rules = new[] { Rule("TeamViewer") };
+        Assert.Equal(AutoAction.Start, t.OnEvent(WindowEventKind.Shown, 7, Win("TeamViewer", "TeamViewer"), rules, true, false).Action);
+        var to8 = t.OnEvent(WindowEventKind.Shown, 8, Win("TeamViewer", "Conexión", h: 8), rules, true, true);
+        Assert.Equal((AutoAction.Switch, (nint)8), (to8.Action, to8.Window));
+        Assert.Equal(8, t.CurrentWindow);
+        // Ni su cambio de título, ni un diálogo del programa, ni otro programa se llevan la grabación.
+        Assert.Equal(AutoAction.None, t.OnEvent(WindowEventKind.TitleChanged, 8, Win("TeamViewer", "Conexión 2", h: 8), rules, true, true).Action);
+        Assert.Equal(AutoAction.None, t.OnEvent(WindowEventKind.Shown, 9, Win("TeamViewer", "Contraseña", h: 9, owned: true), rules, true, true).Action);
+        Assert.Equal(AutoAction.None, t.OnEvent(WindowEventKind.Shown, 10, Win("Teams", "Chat", h: 10), [.. rules, Rule("Teams")], true, true).Action);
+        // Se cierra la conexión: de vuelta al selector, que sigue abierto; al cerrarse este, para.
+        var back = t.OnEvent(WindowEventKind.Destroyed, 8, null, rules, true, true);
+        Assert.Equal((AutoAction.Switch, (nint)7), (back.Action, back.Window));
+        Assert.Equal(AutoAction.Stop, t.OnEvent(WindowEventKind.Destroyed, 7, null, rules, true, true).Action);
+        Assert.Equal(0, t.CurrentWindow);
+    }
+
+    [Fact]
+    public void La_de_atras_cerrada_se_olvida_y_si_no_se_puede_pasar_se_para()
+    {
+        var t = new AutoRecordTracker();
+        var rules = new[] { Rule("TeamViewer") };
+        t.OnEvent(WindowEventKind.Shown, 7, Win("TeamViewer", "TeamViewer"), rules, true, false);
+        t.OnEvent(WindowEventKind.Shown, 8, Win("TeamViewer", "Conexión", h: 8), rules, true, true);
+        // El selector se esconde mientras se graba la conexión: no cambia nada, pero ya no se vuelve a él.
+        Assert.Equal(AutoAction.None, t.OnEvent(WindowEventKind.Hidden, 7, null, rules, true, true).Action);
+        Assert.Equal(8, t.CurrentWindow);
+        Assert.Equal(AutoAction.Stop, t.OnEvent(WindowEventKind.Destroyed, 8, null, rules, true, true).Action);
+
+        // Pasar a la nueva falla (ya cerrada o minimizada): se sigue con la de antes.
+        t.OnEvent(WindowEventKind.Shown, 20, Win("TeamViewer", "TeamViewer", h: 20), rules, true, false);
+        var to21 = t.OnEvent(WindowEventKind.Shown, 21, Win("TeamViewer", "Conexión", h: 21), rules, true, true);
+        var again = t.SwitchFailed(to21.Window, rules, recording: true);
+        Assert.Equal((AutoAction.Switch, (nint)20), (again.Action, again.Window));
+        // Y si la única que queda tampoco se puede, se para.
+        Assert.Equal(AutoAction.Stop, t.SwitchFailed(20, rules, recording: true).Action);
+    }
+
+    [Fact]
+    public void Grabando_a_mano_no_se_cambia_de_ventana()
+    {
+        var t = new AutoRecordTracker();
+        Assert.Equal(AutoAction.None, t.OnEvent(WindowEventKind.Shown, 8, Win("TeamViewer", "Conexión", h: 8), [Rule("TeamViewer")], true, recording: true).Action);
     }
 
     [Fact]

@@ -11,7 +11,8 @@ namespace SocScreenShare.App.Services;
 /// La grabación automática en la aplicación: con el interruptor encendido y alguna regla activa,
 /// vigila las ventanas (<see cref="WindowWatcher"/>, en su propio hilo) y, cuando se abre una que
 /// cumple una regla, graba esa ventana con su sonido; al cerrarse, para y guarda. La decisión la toma
-/// <see cref="AutoRecordTracker"/> en el hilo de la interfaz.
+/// <see cref="AutoRecordTracker"/> en el hilo de la interfaz. Si el programa abre otra ventana de la
+/// misma regla mientras graba (TeamViewer: del selector a la conexión), la grabación se pasa a ella.
 /// </summary>
 public sealed class AutoRecordService : IDisposable
 {
@@ -31,6 +32,7 @@ public sealed class AutoRecordService : IDisposable
             if (!_controller.Machine.IsBusy)
                 _tracker.Clear();
         };
+        _controller.AutoWindowClosed += hwnd => Handle(WindowEventKind.Destroyed, hwnd, null);
     }
 
     /// <summary>Avisos discretos para la bandeja (título y texto ya traducidos).</summary>
@@ -71,7 +73,13 @@ public sealed class AutoRecordService : IDisposable
                 else
                     _tracker.Clear();
             }
-            else if (decision.Action == AutoAction.Stop && _controller.IsAutomatic)
+            while (decision.Action == AutoAction.Switch && _controller.IsAutomatic)
+            {
+                if (await _controller.SwitchWindowAsync(decision.Window))
+                    return;
+                decision = _tracker.SwitchFailed(decision.Window, s.AutoRules, _controller.Machine.IsBusy);
+            }
+            if (decision.Action == AutoAction.Stop && _controller.IsAutomatic)
             {
                 var result = await _controller.StopAsync();
                 if (result is not null)

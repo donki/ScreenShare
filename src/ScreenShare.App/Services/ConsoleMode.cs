@@ -183,11 +183,10 @@ public static class ConsoleMode
                             request = request with { OutputPath = Path.GetFullPath(o.EndsWith(FileNamer.Extension, StringComparison.OrdinalIgnoreCase) ? o : o + FileNamer.Extension) };
                         recorder = await Recorder.StartAsync(request);
                         path = request.OutputPath;
-                        var hwnd = decision.Window;
                         recorder.Notice += n =>
                         {
-                            if (n.Key == "NoticeWindowClosed")
-                                events.Writer.TryWrite((WindowEventKind.Destroyed, hwnd, null));
+                            if (n.Key == "NoticeWindowClosed" && long.TryParse(n.Argument, out var closed))
+                                events.Writer.TryWrite((WindowEventKind.Destroyed, (nint)closed, null));
                         };
                         foreach (var notice in recorder.StartNotices)
                             error.WriteLine(Loc.Format(notice.Key, notice.Argument ?? string.Empty));
@@ -200,7 +199,19 @@ public static class ConsoleMode
                         return 1;
                     }
                 }
-                else if (decision.Action == AutoAction.Stop && recorder is not null)
+                while (decision.Action == AutoAction.Switch && recorder is not null)
+                {
+                    try
+                    {
+                        await recorder.SwitchWindowAsync(decision.Window);
+                        break;
+                    }
+                    catch (RecorderException)
+                    {
+                        decision = tracker.SwitchFailed(decision.Window, [rule], recording: true);
+                    }
+                }
+                if (decision.Action == AutoAction.Stop && recorder is not null)
                 {
                     var result = await recorder.StopAsync();
                     await recorder.DisposeAsync();

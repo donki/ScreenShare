@@ -117,6 +117,9 @@ public enum AutoAction
     None,
     Start,
     Stop,
+
+    /// <summary>Seguir grabando en el mismo fichero, pero otra ventana de la misma regla.</summary>
+    Switch,
 }
 
 public sealed record AutoDecision(AutoAction Action, AutoRecordRule? Rule = null, nint Window = 0)
@@ -128,13 +131,23 @@ public sealed record AutoDecision(AutoAction Action, AutoRecordRule? Rule = null
 /// El estado de la grabación automática: qué ventana se está grabando por qué regla, y qué ventanas
 /// ya dispararon (una ventana graba una vez; si se para a mano no vuelve a empezar sola mientras siga
 /// abierta, aunque cambie de título). Nunca empieza una segunda grabación si ya hay una en marcha.
+/// <para>
+/// Mientras graba, la grabación sigue a la ventana más reciente de la misma regla: hay programas que
+/// abren primero una ventana para elegir y lo que interesa sale en otra (TeamViewer: el selector y
+/// luego la conexión). Esa otra pasa a grabarse en el mismo fichero; al cerrarse, se vuelve a la
+/// anterior que siga abierta, y cuando no queda ninguna, se para. Las ventanas con dueño (diálogos
+/// del programa) no se llevan la grabación.
+/// </para>
 /// </summary>
 public sealed class AutoRecordTracker
 {
     private readonly HashSet<nint> _handled = [];
 
+    // Las ventanas de esta grabación, de la más antigua a la que se graba ahora (la última).
+    private readonly List<nint> _chain = [];
+
     /// <summary>La ventana que se graba por una regla (0 si ninguna).</summary>
-    public nint CurrentWindow { get; private set; }
+    public nint CurrentWindow => _chain.Count > 0 ? _chain[^1] : 0;
     public AutoRecordRule? CurrentRule { get; private set; }
 
     /// <param name="window">Lo que se sabe de la ventana (null si ya no existe).</param>
@@ -147,33 +160,61 @@ public sealed class AutoRecordTracker
             case WindowEventKind.Hidden:
             case WindowEventKind.Destroyed:
                 _handled.Remove(hwnd);
-                if (hwnd != 0 && hwnd == CurrentWindow)
+                if (hwnd == 0 || !_chain.Contains(hwnd))
+                    return AutoDecision.Nothing;
+                var rule = CurrentRule;
+                if (hwnd != CurrentWindow)
                 {
-                    var rule = CurrentRule;
-                    var stop = rule?.StopOnClose == true && recording;
-                    if (kind == WindowEventKind.Destroyed || stop)
-                        Clear();
-                    return stop ? new AutoDecision(AutoAction.Stop, rule, hwnd) : AutoDecision.Nothing;
+                    // Se va una de las de atrás: ya no se vuelve a ella.
+                    _chain.Remove(hwnd);
+                    return AutoDecision.Nothing;
                 }
-                return AutoDecision.Nothing;
+                if (_chain.Count > 1 && recording)
+                {
+                    _chain.RemoveAt(_chain.Count - 1);
+                    return new AutoDecision(AutoAction.Switch, rule, CurrentWindow);
+                }
+                var stop = rule?.StopOnClose == true && recording;
+                if (kind == WindowEventKind.Destroyed || stop)
+                    Clear();
+                return stop ? new AutoDecision(AutoAction.Stop, rule, hwnd) : AutoDecision.Nothing;
 
             default:
-                if (!enabled || recording || window is null || _handled.Contains(hwnd))
+                if (!enabled || window is null || _handled.Contains(hwnd))
                     return AutoDecision.Nothing;
+                if (recording)
+                {
+                    // Otra ventana de la regla que está grabando: la grabación se va con ella.
+                    if (CurrentRule is not { } current || window.HasOwner || _chain.Contains(hwnd))
+                        return AutoDecision.Nothing;
+                    if (AutoRecordMatcher.Match(rules, window) is not { } same || same.Id != current.Id)
+                        return AutoDecision.Nothing;
+                    _handled.Add(hwnd);
+                    _chain.Add(hwnd);
+                    return new AutoDecision(AutoAction.Switch, current, hwnd);
+                }
                 var match = AutoRecordMatcher.Match(rules, window);
                 if (match is null)
                     return AutoDecision.Nothing;
                 _handled.Add(hwnd);
-                CurrentWindow = hwnd;
+                _chain.Clear();
+                _chain.Add(hwnd);
                 CurrentRule = match;
                 return new AutoDecision(AutoAction.Start, match, hwnd);
         }
     }
 
+    /// <summary>
+    /// No se pudo pasar a <paramref name="hwnd"/> (cerrada, minimizada…): se olvida y se dice qué
+    /// hacer ahora (volver a la anterior, parar o nada).
+    /// </summary>
+    public AutoDecision SwitchFailed(nint hwnd, IReadOnlyList<AutoRecordRule> rules, bool recording) =>
+        OnEvent(WindowEventKind.Hidden, hwnd, null, rules, enabled: true, recording);
+
     /// <summary>La grabación automática no llegó a empezar o ya ha terminado (por lo que sea).</summary>
     public void Clear()
     {
-        CurrentWindow = 0;
+        _chain.Clear();
         CurrentRule = null;
     }
 }

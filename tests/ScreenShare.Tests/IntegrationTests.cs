@@ -155,6 +155,63 @@ public sealed class IntegrationTests : IDisposable
     }
 
     [IntegrationFact]
+    public async Task La_regla_sigue_a_la_segunda_ventana_del_programa_en_el_mismo_fichero()
+    {
+        // Como TeamViewer: una ventana abierta (el selector) y luego otra del mismo programa (la conexión).
+        var title = "SCS seguir " + Guid.NewGuid().ToString("N")[..6];
+        var events = Channel.CreateUnbounded<(WindowEventKind Kind, nint Hwnd, WindowInfo? Info)>();
+        using var watcher = new WindowWatcher();
+        watcher.WindowEvent += (k, h, i) => events.Writer.TryWrite((k, h, i));
+        var tracker = new AutoRecordTracker();
+        var rules = new[] { new AutoRecordRule { ProcessName = "sOCScreenShareToneApp.exe", Title = title } };
+        using var first = Tone($"--title \"{title} selector\" --freq 440 --seconds 5 --amp 0.03 --delay 0.2");
+        Process? second = null;
+        Recorder? r = null;
+        var path = Path.Combine(_dir, "seguir.mp4");
+        var seen = new List<(AutoAction, nint)>();
+        RecordingResult? result = null;
+        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+        try
+        {
+            while (result is null)
+            {
+                var e = await events.Reader.ReadAsync(timeout.Token);
+                var d = tracker.OnEvent(e.Kind, e.Hwnd, e.Info, rules, true, r is not null);
+                if (d.Action != AutoAction.None)
+                    seen.Add((d.Action, d.Window));
+                if (d.Action == AutoAction.Start)
+                {
+                    r = await Recorder.StartAsync(new RecordingRequest(TargetKind.Window, null, Devices.Monitors(), d.Window, new QualityOptions(), false,
+                        new AudioPlan(SystemAudioMode.None, null, null, 1f, false, null, 1f), path));
+                    second = Tone($"--title \"{title} conexión\" --freq 660 --seconds 1.2 --amp 0.03 --delay 0.2");
+                }
+                else if (d.Action == AutoAction.Switch && r is not null)
+                {
+                    try { await r.SwitchWindowAsync(d.Window); }
+                    catch (RecorderException ex) { Assert.Fail($"no se pudo pasar a la ventana: {ex.Key} {ex.InnerException?.Message}"); }
+                }
+                else if (d.Action == AutoAction.Stop && r is not null)
+                {
+                    result = await r.StopAsync();
+                    await r.DisposeAsync();
+                }
+            }
+        }
+        finally
+        {
+            second?.Dispose();
+        }
+        Assert.Null(result.ErrorKey);
+        Assert.True(seen.Count == 4, string.Join(", ", seen));
+        // Empieza en el selector, pasa a la conexión, vuelve al selector al cerrarse esta y para con él.
+        Assert.Equal([AutoAction.Start, AutoAction.Switch, AutoAction.Switch, AutoAction.Stop], seen.Select(x => x.Item1));
+        Assert.Equal(seen[0].Item2, seen[2].Item2);
+        Assert.NotEqual(seen[0].Item2, seen[1].Item2);
+        Assert.InRange(result.Duration.TotalSeconds, 3, 8);
+        Assert.True(Mp4Probe.Probe(path).VideoSamples > 0);
+    }
+
+    [IntegrationFact]
     public async Task Calidad_personalizada_sale_con_esos_parametros_exactos()
     {
         var monitors = Devices.Monitors();

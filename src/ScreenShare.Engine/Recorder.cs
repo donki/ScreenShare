@@ -1,3 +1,4 @@
+using System.Globalization;
 using SocScreenShare.Audio;
 using SocScreenShare.Capture;
 using SocScreenShare.Recording;
@@ -66,6 +67,7 @@ public sealed class Recorder : IAsyncDisposable
     private MixerInput? _systemInput, _micInput;
     private AudioSource? _systemSource, _micSource;
     private int _stopped;
+    private readonly object _canvasLock = new();   // cambiar de ventana y cerrar el lienzo, nunca a la vez
 
     private Recorder(RecordingRequest request) => _request = request;
 
@@ -131,7 +133,10 @@ public sealed class Recorder : IAsyncDisposable
         // 2. Tarjeta gráfica, lienzo y conversión.
         _gd = new GraphicsDevice();
         _canvas = new ScreenCanvas(_gd, parts, canvasW, canvasH, _request.Target == TargetKind.Window, _request.Cursor);
-        _canvas.SourceClosed += () => Notice?.Invoke(new RecorderNotice(_request.Target == TargetKind.Window ? "NoticeWindowClosed" : "NoticeMonitorGone"));
+        // Con una ventana, el aviso lleva cuál se ha cerrado (su número, en texto).
+        _canvas.SourceClosed += hwnd => Notice?.Invoke(_request.Target == TargetKind.Window
+            ? new RecorderNotice("NoticeWindowClosed", hwnd.ToString(CultureInfo.InvariantCulture))
+            : new RecorderNotice("NoticeMonitorGone"));
         _converter = new FrameConverter(_gd, _canvas, Plan.Width, Plan.Height, Plan.Fps);
 
         // 3. Audio: cada origen por separado; el que no arranca se avisa y la grabación sigue sin él.
@@ -208,19 +213,13 @@ public sealed class Recorder : IAsyncDisposable
             case TargetKind.Window:
                 if (!Devices.IsWindowAlive(_request.Window))
                     throw new RecorderException("ErrWindowGone");
-                if (Native.IsIconic(_request.Window))
-                    throw new RecorderException("ErrWindowMinimized");
-                GraphicsCaptureItem item;
-                try { item = GraphicsDevice.ItemForWindow(_request.Window); }
-                catch (Exception ex) { throw new RecorderException("ErrWindowNotCapturable", null, ex); }
+                var item = WindowItem(_request.Window);
                 var size = item.Size;
-                if (size.Width < 2 || size.Height < 2)
-                    throw new RecorderException("ErrWindowMinimized");
                 // El lienzo deja sitio para que la ventana crezca (hasta el escritorio entero).
                 var desk = MonitorLayout.VirtualBounds(_request.Monitors);
                 var cw = Math.Min(MaxTexture, Math.Max(size.Width, desk.Width)) & ~1;
                 var ch = Math.Min(MaxTexture, Math.Max(size.Height, desk.Height)) & ~1;
-                return ([new CapturePart(item, 0, 0)], cw, ch, size.Width, size.Height);
+                return ([new CapturePart(item, 0, 0, _request.Window)], cw, ch, size.Width, size.Height);
 
             case TargetKind.AllMonitors:
                 if (_request.Monitors.Count == 0)
@@ -240,6 +239,37 @@ public sealed class Recorder : IAsyncDisposable
                 return ([new CapturePart(mi, 0, 0)], mi.Size.Width & ~1, mi.Size.Height & ~1, mi.Size.Width, mi.Size.Height);
         }
     }
+
+    /// <summary>El elemento de captura de una ventana que se puede grabar; si no, <see cref="RecorderException"/>.</summary>
+    private static GraphicsCaptureItem WindowItem(nint hwnd)
+    {
+        if (!Devices.IsWindowAlive(hwnd))
+            throw new RecorderException("ErrWindowGone");
+        if (Native.IsIconic(hwnd))
+            throw new RecorderException("ErrWindowMinimized");
+        GraphicsCaptureItem item;
+        try { item = GraphicsDevice.ItemForWindow(hwnd); }
+        catch (Exception ex) { throw new RecorderException("ErrWindowNotCapturable", null, ex); }
+        if (item.Size.Width < 2 || item.Size.Height < 2)
+            throw new RecorderException("ErrWindowMinimized");
+        return item;
+    }
+
+    /// <summary>
+    /// Grabando una ventana, seguir en el mismo fichero con otra (la grabación automática, cuando el
+    /// programa abre otra ventana). El sonido sigue siendo el del proceso del principio. Lanza
+    /// <see cref="RecorderException"/> si la nueva no se puede grabar; entonces sigue la de antes.
+    /// </summary>
+    public Task SwitchWindowAsync(nint hwnd) => Task.Run(() =>
+    {
+        var item = WindowItem(hwnd);
+        lock (_canvasLock)
+        {
+            if (_request.Target != TargetKind.Window || _canvas is not { } canvas || Volatile.Read(ref _stopped) == 1)
+                throw new RecorderException("ErrWindowGone");
+            canvas.SwitchTo(new CapturePart(item, 0, 0, hwnd));
+        }
+    });
 
     private async Task<AudioSource?> TryAudio(string name, AudioKind kind, string? deviceId, int pid, MixerInput input, string noticeKey)
     {
@@ -380,8 +410,11 @@ public sealed class Recorder : IAsyncDisposable
         foreach (var s in _sources)
             s.DisposeAsync().AsTask().Wait(TimeSpan.FromSeconds(3));
         _sources.Clear();
-        _canvas?.Dispose();
-        _canvas = null;
+        lock (_canvasLock)
+        {
+            _canvas?.Dispose();
+            _canvas = null;
+        }
 
         string? error = _failure is null ? null : IsDiskFull(_failure) ? "NoticeDiskFull" : "NoticeRecordingFailed";
         try
@@ -412,7 +445,8 @@ public sealed class Recorder : IAsyncDisposable
         foreach (var s in _sources)
             await s.DisposeAsync().ConfigureAwait(false);
         _sources.Clear();
-        _canvas?.Dispose();
+        lock (_canvasLock)
+            _canvas?.Dispose();
         _converter?.Dispose();
         _writer?.Dispose();
         _gd?.Dispose();

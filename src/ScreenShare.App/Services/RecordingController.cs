@@ -43,6 +43,12 @@ public sealed class RecordingController
     public event Action? Tick;
     public event Action? StateChanged;
 
+    /// <summary>
+    /// En una grabación automática, se ha cerrado la ventana que se grababa (con cuál): decide quien
+    /// lleva las reglas (volver a otra ventana o parar). Sin nadie suscrito, se para como a mano.
+    /// </summary>
+    public event Action<nint>? AutoWindowClosed;
+
     /// <summary>Un aviso para el usuario (texto ya traducido) que no detiene la grabación.</summary>
     public event Action<string>? Notice;
 
@@ -110,6 +116,32 @@ public sealed class RecordingController
             s.EffectiveQuality(), s.ShowCursor, audio, path);
     }
 
+    /// <summary>Seguir grabando en el mismo fichero, pero otra ventana. False si no se pudo (sigue la de antes).</summary>
+    public async Task<bool> SwitchWindowAsync(nint hwnd)
+    {
+        // Una ventana recién enseñada a veces aún no se deja capturar: unos intentos antes de rendirse.
+        for (var attempt = 1; ; attempt++)
+        {
+            if (_recorder is not { } recorder || !Machine.CanStop)
+                return false;
+            try
+            {
+                await recorder.SwitchWindowAsync(hwnd);
+                return true;
+            }
+            catch (Exception ex) when (attempt < 3 && Devices.IsWindowAlive(hwnd))
+            {
+                AppLog.Write($"pasar a otra ventana, intento {attempt}: {ex.Message}");
+                await Task.Delay(300);
+            }
+            catch (Exception ex)
+            {
+                AppLog.Write($"no se pudo pasar a otra ventana: {ex.Message}");
+                return false;
+            }
+        }
+    }
+
     public void TogglePause()
     {
         if (_recorder is null)
@@ -159,6 +191,12 @@ public sealed class RecordingController
 
     private void OnNotice(RecorderNotice n) => _ui.BeginInvoke(async () =>
     {
+        if (n.Key == "NoticeWindowClosed" && IsAutomatic && AutoWindowClosed is { } handler
+            && long.TryParse(n.Argument, out var hwnd))
+        {
+            handler((nint)hwnd);
+            return;
+        }
         Notice?.Invoke(Text(n.Key, n.Argument));
         // Sin lo que se graba no tiene sentido seguir: se para y se guarda lo que haya.
         if (n.Key is "NoticeWindowClosed" or "NoticeMonitorGone" or "NoticeDiskFull" or "NoticeRecordingFailed")
