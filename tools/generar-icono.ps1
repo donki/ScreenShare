@@ -60,3 +60,35 @@ for ($i = 0; $i -lt $sizes.Count; $i++) {
 foreach ($p in $pngs) { $bw.Write($p) }
 $bw.Close()
 "appicon.ico, Assets\logo.png y Assets\tray-recording.png generados en $app"
+
+# Imagenes del paquete MSIX (Package\Images) y de la ficha de la Store (store\microsoft\logos).
+$raiz = Split-Path -Parent $PSScriptRoot
+function Icono([int]$z) { return Draw $z $false }
+function Lienzo([int]$w, [int]$h, [double]$escala, [bool]$fondo) {
+    $bmp = New-Object System.Drawing.Bitmap $w, $h
+    $g = [System.Drawing.Graphics]::FromImage($bmp)
+    $g.InterpolationMode = 'HighQualityBicubic'
+    $g.Clear([System.Drawing.Color]::Transparent)
+    if ($fondo) {
+        $b = New-Object System.Drawing.Drawing2D.LinearGradientBrush ([System.Drawing.PointF]::new(0,0)), ([System.Drawing.PointF]::new($w,$h)), ([System.Drawing.Color]::FromArgb(0x63,0x5B,0xF2)), ([System.Drawing.Color]::FromArgb(0x2A,0x1C,0xB8))
+        $g.FillRectangle($b, 0, 0, $w, $h)
+    }
+    $lado = [int]([Math]::Min($w, $h) * $escala)
+    $i = Icono $lado
+    $g.DrawImage($i, [int](($w - $lado) / 2), [int](($h - $lado) / 2), $lado, $lado)
+    $i.Dispose(); $g.Dispose()
+    return $bmp
+}
+function Guardar($bmp, $ruta) { New-Item -ItemType Directory -Force (Split-Path $ruta) | Out-Null; [IO.File]::WriteAllBytes($ruta, (Png $bmp)) }
+$img = Join-Path $raiz 'Package\Images'
+foreach ($p in @(@('Square44x44Logo', 44), @('Square44x44Logo.targetsize-24_altform-unplated', 24), @('StoreLogo', 50),
+                 @('SmallTile', 71), @('Square150x150Logo', 150), @('StoreDisplay300', 300), @('Square310x310Logo', 310), @('LargeTile', 310))) {
+    Guardar (Icono $p[1]) (Join-Path $img "$($p[0]).png")
+}
+Guardar (Lienzo 310 150 0.8 $false) (Join-Path $img 'Wide310x150Logo.png')
+$logos = Join-Path $raiz 'store\microsoft\logos'
+foreach ($z in 71, 150, 300) { Guardar (Icono $z) (Join-Path $logos "icono-${z}x${z}.png") }
+Guardar (Lienzo 1080 1080 0.5 $true) (Join-Path $logos 'caja-1x1-1080x1080.png')
+Guardar (Lienzo 1920 1080 0.4 $true) (Join-Path $logos 'heroe-16x9-1920x1080.png')
+Guardar (Lienzo 720 1080 0.6 $true) (Join-Path $logos 'poster-9x16-720x1080.png')
+"Imagenes del MSIX y de la Store generadas en $raiz"

@@ -142,6 +142,24 @@ public sealed class RecordingController
         }
     }
 
+    /// <summary>Pausar (false si no estaba grabando).</summary>
+    public bool Pause()
+    {
+        if (_recorder is not { } recorder || !Machine.TryPause())
+            return false;
+        recorder.Pause();
+        return true;
+    }
+
+    /// <summary>Seguir tras una pausa (false si no estaba en pausa).</summary>
+    public bool Resume()
+    {
+        if (_recorder is not { } recorder || !Machine.TryResume())
+            return false;
+        recorder.Resume();
+        return true;
+    }
+
     public void TogglePause()
     {
         if (_recorder is null)

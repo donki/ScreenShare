@@ -26,6 +26,11 @@ public static class Devices
         return pid;
     }
 
+    public static bool IsMinimized(nint hwnd) => hwnd != 0 && Native.IsIconic(hwnd);
+
+    /// <summary>El proceso de la ventana en primer plano (0 si ninguna).</summary>
+    public static int ForegroundProcess() => ProcessOf(Native.GetForegroundWindow());
+
     /// <summary>Lo que se sabe ahora de una ventana (null si ya no existe).</summary>
     public static WindowInfo? Describe(nint hwnd) => hwnd != 0 && Native.IsWindow(hwnd) ? Native.Describe(hwnd) : null;
 

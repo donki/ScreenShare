@@ -3,6 +3,7 @@ using SocScreenShare.AutoRecord;
 using SocScreenShare.Capture;
 using SocScreenShare.Engine;
 using SocScreenShare.Localization;
+using SocScreenShare.Recording;
 using SocScreenShare.Settings;
 
 namespace SocScreenShare.App.Services;
@@ -13,6 +14,8 @@ namespace SocScreenShare.App.Services;
 /// cumple una regla, graba esa ventana con su sonido; al cerrarse, para y guarda. La decisión la toma
 /// <see cref="AutoRecordTracker"/> en el hilo de la interfaz. Si el programa abre otra ventana de la
 /// misma regla mientras graba (TeamViewer: del selector a la conexión), la grabación se pasa a ella.
+/// Mientras la aplicación está minimizada o detrás de otra, se pausa y al volver sigue en el mismo
+/// fichero (<see cref="BackgroundPause"/>), si la regla lo pide.
 /// </summary>
 public sealed class AutoRecordService : IDisposable
 {
@@ -21,16 +24,31 @@ public sealed class AutoRecordService : IDisposable
     private readonly Dispatcher _ui;
     private readonly AutoRecordTracker _tracker = new();
     private WindowWatcher? _watcher;
+    private readonly DispatcherTimer _focusDelay;
+
+    // La pausa en marcha la puso la regla (no la persona): solo esa se quita sola.
+    private bool _pausedByUs;
 
     public AutoRecordService(RecordingController controller, Func<RecorderSettings> settings, Dispatcher ui)
     {
         _controller = controller;
         _settings = settings;
         _ui = ui;
+        // Un respiro antes de mirar el primer plano: al pasar por la barra de tareas o Alt+Tab,
+        // el foco salta un instante a otra ventana y no merece cortar el vídeo.
+        _focusDelay = new DispatcherTimer(DispatcherPriority.Background, ui) { Interval = TimeSpan.FromMilliseconds(400) };
+        _focusDelay.Tick += (_, _) =>
+        {
+            _focusDelay.Stop();
+            CheckFront();
+        };
         _controller.StateChanged += () =>
         {
             if (!_controller.Machine.IsBusy)
+            {
                 _tracker.Clear();
+                _pausedByUs = false;
+            }
         };
         _controller.AutoWindowClosed += hwnd => Handle(WindowEventKind.Destroyed, hwnd, null);
     }
@@ -49,6 +67,11 @@ public sealed class AutoRecordService : IDisposable
         {
             _watcher = new WindowWatcher();
             _watcher.WindowEvent += (k, h, i) => _ui.BeginInvoke(() => Handle(k, h, i));
+            _watcher.FocusChanged += () => _ui.BeginInvoke(() =>
+            {
+                _focusDelay.Stop();
+                _focusDelay.Start();
+            });
         }
         else if (!wanted && _watcher is not null)
         {
@@ -92,8 +115,36 @@ public sealed class AutoRecordService : IDisposable
         }
     }
 
+    /// <summary>Pausa o sigue según esté delante la aplicación que se graba.</summary>
+    private void CheckFront()
+    {
+        try
+        {
+            if (!_controller.IsAutomatic)
+                return;
+            var hwnd = _tracker.CurrentWindow;
+            var front = BackgroundPause.IsInFront(Devices.ProcessOf(hwnd), Devices.IsMinimized(hwnd),
+                Devices.ForegroundProcess(), Environment.ProcessId);
+            var state = _controller.Machine.State;
+            switch (BackgroundPause.Decide(_tracker.CurrentRule, front, state == RecordingState.Recording, state == RecordingState.Paused, _pausedByUs))
+            {
+                case AutoAction.Pause when _controller.Pause():
+                    _pausedByUs = true;
+                    break;
+                case AutoAction.Resume when _controller.Resume():
+                    _pausedByUs = false;
+                    break;
+            }
+        }
+        catch (Exception ex)
+        {
+            AppLog.Write($"pausa en segundo plano: {ex}");
+        }
+    }
+
     public void Dispose()
     {
+        _focusDelay.Stop();
         _watcher?.Dispose();
         _watcher = null;
     }
@@ -111,8 +162,24 @@ public static class WindowsStartup
 #if DEBUG
     public static bool IsAvailable => false;
 #else
-    public static bool IsAvailable => !Sandbox.IsOn;
+    // Dentro del MSIX de la Store las escrituras en HKCU van a un registro privado del paquete:
+    // la clave Run no llegaría a Windows, así que la opción no se ofrece.
+    public static bool IsAvailable => !Sandbox.IsOn && !IsPackaged();
 #endif
+
+    [System.Runtime.InteropServices.DllImport("kernel32.dll", CharSet = System.Runtime.InteropServices.CharSet.Unicode)]
+    private static extern int GetCurrentPackageFullName(ref int length, System.Text.StringBuilder? name);
+
+    /// <summary>Si corre instalada desde el MSIX (APPMODEL_ERROR_NO_PACKAGE = 15700 si no).</summary>
+    public static bool IsPackaged()
+    {
+        try
+        {
+            var length = 0;
+            return GetCurrentPackageFullName(ref length, null) != 15700;
+        }
+        catch (Exception) { return false; }
+    }
 
     public static bool IsEnabled()
     {

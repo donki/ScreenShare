@@ -1,5 +1,33 @@
 # Changelog — sOC ScreenShare
 
+## 2026.11.1.0 — La grabación automática se pausa en segundo plano; Microsoft Store · Automatic recording pauses in the background; Microsoft Store
+
+**Español**
+
+- **La grabación automática se pausa mientras la aplicación no está delante**: si se minimiza o pasa
+  otra aplicación al primer plano, la grabación se pausa; cuando vuelve, sigue **en el mismo vídeo**.
+  Cuentan como «delante» todas las ventanas del mismo programa (sus diálogos, la lista de TeamViewer)
+  y no cuenta sOC ScreenShare (abrir su menú de la bandeja no pausa ni reanuda). Espera 0,4 s antes de
+  decidir, para no cortar al pasar por la barra de tareas o Alt+Tab. Una pausa puesta a mano no se
+  quita sola. Casilla nueva en cada regla, activada por defecto: «Pausar mientras la aplicación está
+  minimizada o detrás de otra, y seguir al volver».
+- **Microsoft Store**: paquete MSIX (`tools\empaquetar-msix.ps1`) con imágenes y fichas en
+  `store/microsoft`. Instalada desde la Store no ofrece «Arrancar con Windows» (la clave Run
+  quedaría en el registro privado del paquete).
+
+**English**
+
+- **Automatic recording pauses while the app is not in front**: if it is minimized or another app
+  comes to the foreground, the recording pauses; when it comes back, it carries on **in the same
+  video**. Every window of the same program counts as "in front" (its dialogs, TeamViewer's list) and
+  sOC ScreenShare does not (opening its tray menu neither pauses nor resumes). It waits 0.4 s before
+  deciding, so going through the taskbar or Alt+Tab does not cut it. A pause you set yourself is not
+  lifted on its own. New box in each rule, on by default: "Pause while the app is minimized or behind
+  another, and carry on when it comes back".
+- **Microsoft Store**: MSIX package (`tools\empaquetar-msix.ps1`) with images and listings in
+  `store/microsoft`. Installed from the Store it does not offer "Start with Windows" (the Run key
+  would end up in the package's private registry).
+
 ## 2026.10.15.0 — La grabación automática sigue a la ventana nueva · Automatic recording follows the new window
 
 **Español**

@@ -33,6 +33,9 @@ public sealed class AutoRecordRule
     /// <summary>Parar y guardar cuando la ventana se cierra o se esconde.</summary>
     public bool StopOnClose { get; set; } = true;
 
+    /// <summary>Pausar mientras la aplicación está minimizada o detrás de otra, y seguir al volver.</summary>
+    public bool PauseInBackground { get; set; } = true;
+
     /// <summary>«Teams.exe», «C:\…\Teams.exe» o «Teams» → «Teams».</summary>
     public static string NormalizeProcess(string? name)
     {
@@ -63,6 +66,7 @@ public sealed class AutoRecordRule
         Title = Title,
         TitleMode = TitleMode,
         StopOnClose = StopOnClose,
+        PauseInBackground = PauseInBackground,
     };
 }
 
@@ -120,6 +124,58 @@ public enum AutoAction
 
     /// <summary>Seguir grabando en el mismo fichero, pero otra ventana de la misma regla.</summary>
     Switch,
+
+    /// <summary>La aplicación ha quedado minimizada o detrás: pausar (mismo fichero).</summary>
+    Pause,
+
+    /// <summary>La aplicación ha vuelto al primer plano: seguir donde se pausó.</summary>
+    Resume,
+}
+
+/// <summary>
+/// Pausa de la grabación automática mientras la aplicación grabada no está delante: minimizada o con
+/// otra aplicación en primer plano. Al volver, sigue en el mismo fichero. Solo reanuda lo que pausó
+/// ella: una pausa a mano se respeta.
+/// </summary>
+public static class BackgroundPause
+{
+    /// <summary>
+    /// ¿Está delante la aplicación grabada? Null si no se puede saber y no hay que cambiar nada (el
+    /// primer plano es de sOC ScreenShare, p. ej. su menú de la bandeja, o de nadie).
+    /// </summary>
+    /// <param name="targetPid">El proceso de la ventana que se graba (0 si ya no existe).</param>
+    /// <param name="targetMinimized">Si esa ventana está minimizada.</param>
+    /// <param name="foregroundPid">El proceso de la ventana en primer plano (0 si ninguna).</param>
+    /// <param name="ownPid">El de esta aplicación.</param>
+    public static bool? IsInFront(int targetPid, bool targetMinimized, int foregroundPid, int ownPid)
+    {
+        if (targetPid == 0)
+            return null;
+        if (targetMinimized)
+            return false;
+        if (foregroundPid == 0 || foregroundPid == ownPid)
+            return null;
+        // Cualquier ventana del mismo programa cuenta como delante (sus diálogos, la lista de TeamViewer).
+        return foregroundPid == targetPid;
+    }
+
+    /// <param name="rule">La regla que graba (null si la grabación no es automática).</param>
+    /// <param name="inFront">Lo de <see cref="IsInFront"/>.</param>
+    /// <param name="recording">Grabando (no en pausa).</param>
+    /// <param name="paused">En pausa.</param>
+    /// <param name="pausedByUs">La pausa la puso la regla, no la persona.</param>
+    public static AutoAction Decide(AutoRecordRule? rule, bool? inFront, bool recording, bool paused, bool pausedByUs)
+    {
+        if (rule is null || inFront is not { } front)
+            return AutoAction.None;
+        if (!rule.PauseInBackground)
+            return paused && pausedByUs ? AutoAction.Resume : AutoAction.None;
+        if (!front && recording)
+            return AutoAction.Pause;
+        if (front && paused && pausedByUs)
+            return AutoAction.Resume;
+        return AutoAction.None;
+    }
 }
 
 public sealed record AutoDecision(AutoAction Action, AutoRecordRule? Rule = null, nint Window = 0)

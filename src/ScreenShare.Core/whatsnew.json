@@ -1,5 +1,15 @@
 [
   {
+    "version": "2026.11.1.0",
+    "date": "2026-11-01",
+    "es": [
+      "La grabación automática se pausa mientras la aplicación está minimizada o detrás de otra, y sigue en el mismo vídeo cuando vuelve al primer plano. Si la pausas tú, no se reanuda sola. Se puede quitar en cada regla («Pausar mientras la aplicación está minimizada o detrás de otra»)."
+    ],
+    "en": [
+      "Automatic recording pauses while the app is minimized or behind another one, and carries on in the same video when it comes back to the front. If you pause it yourself, it does not resume on its own. It can be turned off in each rule (\"Pause while the app is minimized or behind another\")."
+    ]
+  },
+  {
     "version": "2026.10.15.0",
     "date": "2026-10-15",
     "es": [

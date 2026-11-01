@@ -10,10 +10,14 @@ namespace SocScreenShare.Engine;
 /// con <c>SetWinEventHook</c> (sin sondeo). Corre en un hilo propio con su bucle de mensajes, nunca
 /// en el de la interfaz: si la interfaz se atasca, los avisos siguen llegando, y al revés (en sOC
 /// Credentials un gancho en el hilo de la interfaz la dejó colgada). Los avisos salen en ese hilo:
-/// quien los recibe los pasa al suyo.
+/// quien los recibe los pasa al suyo. Avisa también de los cambios de primer plano y de minimizar o
+/// restaurar (<see cref="FocusChanged"/>).
 /// </summary>
 public sealed class WindowWatcher : IDisposable
 {
+    private const uint EventSystemForeground = 0x0003;
+    private const uint EventSystemMinimizeStart = 0x0016;
+    private const uint EventSystemMinimizeEnd = 0x0017;
     private const uint EventObjectCreate = 0x8000;
     private const uint EventObjectDestroy = 0x8001;
     private const uint EventObjectShow = 0x8002;
@@ -30,7 +34,7 @@ public sealed class WindowWatcher : IDisposable
     private readonly bool _skipOwnProcess;
     private WinEventProc? _proc;   // referencia viva: si el recolector se la lleva, Windows llama a basura
     private uint _threadId;
-    private nint _hookA, _hookB;
+    private nint _hookA, _hookB, _hookC, _hookD;
 
     /// <param name="skipOwnProcess">Las ventanas de esta aplicación no cuentan (false solo en pruebas).</param>
     public WindowWatcher(bool skipOwnProcess = true)
@@ -45,6 +49,9 @@ public sealed class WindowWatcher : IDisposable
     /// <summary>Un aviso, con lo que se sabe de la ventana (null si ya no existe). En el hilo del vigilante.</summary>
     public event Action<WindowEventKind, nint, WindowInfo?>? WindowEvent;
 
+    /// <summary>Otra ventana ha pasado al primer plano, o una se ha minimizado o restaurado. En el hilo del vigilante.</summary>
+    public event Action? FocusChanged;
+
     public bool IsRunning => _hookA != 0;
 
     private void Run()
@@ -55,6 +62,9 @@ public sealed class WindowWatcher : IDisposable
         // Dos rangos: crear…esconder (0x8000-0x8003) y el cambio de nombre (0x800C).
         _hookA = SetWinEventHook(EventObjectCreate, EventObjectHide, 0, _proc, 0, 0, flags);
         _hookB = SetWinEventHook(EventObjectNameChange, EventObjectNameChange, 0, _proc, 0, 0, flags);
+        // Y el primer plano y minimizar/restaurar, para la pausa en segundo plano.
+        _hookC = SetWinEventHook(EventSystemForeground, EventSystemForeground, 0, _proc, 0, 0, flags);
+        _hookD = SetWinEventHook(EventSystemMinimizeStart, EventSystemMinimizeEnd, 0, _proc, 0, 0, flags);
         if (_hookA == 0)
             AppLog.Write("no se pudo vigilar las ventanas (SetWinEventHook)");
         _ready.Set();
@@ -65,7 +75,9 @@ public sealed class WindowWatcher : IDisposable
         }
         if (_hookA != 0) UnhookWinEvent(_hookA);
         if (_hookB != 0) UnhookWinEvent(_hookB);
-        _hookA = _hookB = 0;
+        if (_hookC != 0) UnhookWinEvent(_hookC);
+        if (_hookD != 0) UnhookWinEvent(_hookD);
+        _hookA = _hookB = _hookC = _hookD = 0;
     }
 
     private void OnEvent(nint hook, uint evt, nint hwnd, int idObject, int idChild, uint thread, uint time)
@@ -74,6 +86,11 @@ public sealed class WindowWatcher : IDisposable
             return;
         try
         {
+            if (evt is EventSystemForeground or EventSystemMinimizeStart or EventSystemMinimizeEnd)
+            {
+                FocusChanged?.Invoke();
+                return;
+            }
             WindowEventKind kind;
             switch (evt)
             {

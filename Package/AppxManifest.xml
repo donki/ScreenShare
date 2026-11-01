@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+    Manifiesto del paquete MSIX de sOC ScreenShare para la Microsoft Store.
+
+    LOS VALORES LOS PONE EL SCRIPT (tools/empaquetar-msix.ps1), que los trae por defecto ya
+    rellenos con los que asigno Partner Center (Product management > Product identity). Aqui se
+    quedan como marcadores para que este fichero no dependa de una cuenta concreta.
+
+    <DisplayName> tambien va como marcador y NO es un detalle: la Store comprueba que el nombre del
+    paquete coincida con uno de los nombres reservados de la aplicacion. Si no coincide, rechaza el
+    envio.
+
+    El paquete envuelve el ejecutable autocontenido tal cual (no hay instalador): MSIX es
+    precisamente lo que la Store pide para una aplicacion de escritorio, y ademas le da instalacion
+    y desinstalacion limpias.
+
+    `runFullTrust` es lo que necesita una aplicacion de escritorio de toda la vida dentro de un
+    MSIX. Ademas solo se declara microphone, que la aplicacion usa de verdad (constitucion general,
+    seccion 6: minimo privilegio).
+-->
+
+<Package
+    xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+    xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+    xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+    IgnorableNamespaces="uap rescap">
+
+  <Identity
+      Name="@@IDENTITY_NAME@@"
+      Publisher="@@PUBLISHER@@"
+      Version="@@VERSION@@"
+      ProcessorArchitecture="x64" />
+
+  <Properties>
+    <DisplayName>@@DISPLAY_NAME@@</DisplayName>
+    <PublisherDisplayName>@@PUBLISHER_DISPLAY_NAME@@</PublisherDisplayName>
+    <Logo>Images\StoreLogo.png</Logo>
+    <Description>Graba una pantalla, todas o una ventana con su sonido en un MP4 listo para compartir.</Description>
+  </Properties>
+
+  <Dependencies>
+    <!-- Windows 10 2004 (19041) en adelante: es el minimo razonable hoy y el que pide la Store. -->
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.19041.0" MaxVersionTested="10.0.26100.0" />
+  </Dependencies>
+
+  <Resources>
+    <Resource Language="es-ES" />
+    <Resource Language="en-US" />
+  </Resources>
+
+  <Applications>
+    <Application Id="ScreenShare" Executable="sOCScreenShare.exe" EntryPoint="Windows.FullTrustApplication">
+      <uap:VisualElements
+          DisplayName="@@DISPLAY_NAME@@"
+          Description="Graba una pantalla, todas o una ventana con su sonido en un MP4 listo para compartir."
+          BackgroundColor="transparent"
+          Square150x150Logo="Images\Square150x150Logo.png"
+          Square44x44Logo="Images\Square44x44Logo.png">
+        <uap:DefaultTile
+            Wide310x150Logo="Images\Wide310x150Logo.png"
+            Square310x310Logo="Images\Square310x310Logo.png"
+            Square71x71Logo="Images\SmallTile.png" />
+        <uap:SplashScreen Image="Images\Square310x310Logo.png" />
+      </uap:VisualElements>
+    </Application>
+  </Applications>
+
+  <Capabilities>
+    <rescap:Capability Name="runFullTrust" />
+    <DeviceCapability Name="microphone" />
+  </Capabilities>
+
+</Package>

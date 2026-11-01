@@ -363,7 +363,7 @@ public sealed class SettingsTests : IDisposable
             Language = "es", OutputFolder = @"D:\vid", Target = TargetKind.Window, MonitorId = @"\\.\DISPLAY2", Quality = QualityPreset.High,
             SystemAudio = SystemAudioMode.App, AppProcessName = "msedge", SystemVolume = 40, MicEnabled = true, MicDeviceId = "mic1", MicVolume = 70,
             WindowAudio = false, WindowVolume = 55, StartHotkey = "Alt+F7", StopHotkey = "Alt+F8", AutoRecordEnabled = true,
-            AutoRules = [new AutoRecordRule { ProcessName = "Teams", Title = "Reunión", TitleMode = TitleMatch.Regex, StopOnClose = false }],
+            AutoRules = [new AutoRecordRule { ProcessName = "Teams", Title = "Reunión", TitleMode = TitleMatch.Regex, StopOnClose = false, PauseInBackground = false }],
         };
         Assert.True(s.Save());
         var json = File.ReadAllText(RecorderSettings.FilePath);
@@ -374,6 +374,8 @@ public sealed class SettingsTests : IDisposable
         Assert.Equal(("Alt+F7", "Alt+F8", true), (back.StartHotkey, back.StopHotkey, back.AutoRecordEnabled));
         var rule = Assert.Single(back.AutoRules);
         Assert.Equal(("Teams", "Reunión", TitleMatch.Regex, false), (rule.ProcessName, rule.Title, rule.TitleMode, rule.StopOnClose));
+        Assert.False(rule.PauseInBackground);
+        Assert.False(back.Clone().AutoRules[0].PauseInBackground);
         var copy = back.Clone();
         copy.AutoRules[0].Title = "otro";
         Assert.Equal("Reunión", back.AutoRules[0].Title);   // la copia es independiente
@@ -603,6 +605,58 @@ public sealed class AutoRecordTests
         t.OnEvent(WindowEventKind.Shown, 7, Win("Teams", "Chat"), rules, true, false);
         Assert.Equal(AutoAction.Stop, t.OnEvent(WindowEventKind.Hidden, 7, null, rules, true, true).Action);
         Assert.Equal(AutoAction.None, t.OnEvent(WindowEventKind.Destroyed, 7, null, rules, true, false).Action);
+    }
+
+    // ---------- Pausa mientras la aplicación no está delante ----------
+
+    [Fact]
+    public void Pausa_en_segundo_plano_viene_puesta_en_las_reglas_nuevas() =>
+        Assert.True(new AutoRecordRule().PauseInBackground);
+
+    [Theory]
+    [InlineData(10, false, 10, 99, true)]     // delante
+    [InlineData(10, false, 20, 99, false)]    // otra aplicación delante
+    [InlineData(10, true, 10, 99, false)]     // minimizada, aunque el foco siga en ella
+    [InlineData(10, true, 99, 99, false)]     // minimizada y el foco en sOC ScreenShare
+    [InlineData(10, false, 99, 99, null)]     // el foco en sOC ScreenShare (su bandeja): no se toca
+    [InlineData(10, false, 0, 99, null)]      // sin ventana en primer plano
+    [InlineData(0, false, 20, 99, null)]      // la ventana grabada ya no existe
+    public void Esta_delante(int target, bool minimized, int foreground, int own, bool? expected) =>
+        Assert.Equal(expected, BackgroundPause.IsInFront(target, minimized, foreground, own));
+
+    [Fact]
+    public void Pausa_al_quedar_detras_y_sigue_al_volver()
+    {
+        var rule = Rule("Teams");
+        Assert.Equal(AutoAction.Pause, BackgroundPause.Decide(rule, false, recording: true, paused: false, pausedByUs: false));
+        Assert.Equal(AutoAction.Resume, BackgroundPause.Decide(rule, true, recording: false, paused: true, pausedByUs: true));
+        // Ya en pausa y sigue detrás, o grabando y delante: nada.
+        Assert.Equal(AutoAction.None, BackgroundPause.Decide(rule, false, recording: false, paused: true, pausedByUs: true));
+        Assert.Equal(AutoAction.None, BackgroundPause.Decide(rule, true, recording: true, paused: false, pausedByUs: false));
+    }
+
+    [Fact]
+    public void Una_pausa_a_mano_no_se_quita_sola()
+    {
+        var rule = Rule("Teams");
+        Assert.Equal(AutoAction.None, BackgroundPause.Decide(rule, true, recording: false, paused: true, pausedByUs: false));
+    }
+
+    [Fact]
+    public void Sin_saber_si_esta_delante_o_sin_regla_no_se_toca()
+    {
+        Assert.Equal(AutoAction.None, BackgroundPause.Decide(Rule("Teams"), null, recording: true, paused: false, pausedByUs: false));
+        Assert.Equal(AutoAction.None, BackgroundPause.Decide(null, false, recording: true, paused: false, pausedByUs: false));
+    }
+
+    [Fact]
+    public void Con_la_casilla_quitada_no_pausa_y_suelta_la_pausa_que_puso()
+    {
+        var rule = Rule("Teams");
+        rule.PauseInBackground = false;
+        Assert.Equal(AutoAction.None, BackgroundPause.Decide(rule, false, recording: true, paused: false, pausedByUs: false));
+        Assert.Equal(AutoAction.Resume, BackgroundPause.Decide(rule, false, recording: false, paused: true, pausedByUs: true));
+        Assert.Equal(AutoAction.None, BackgroundPause.Decide(rule, false, recording: false, paused: true, pausedByUs: false));
     }
 }
 

@@ -34,6 +34,7 @@ internal static unsafe partial class Native
     [DllImport("user32.dll")] public static extern bool IsWindowVisible(nint hwnd);
     [DllImport("user32.dll")] public static extern bool IsWindow(nint hwnd);
     [DllImport("user32.dll")] public static extern bool IsIconic(nint hwnd);
+    [DllImport("user32.dll")] public static extern nint GetForegroundWindow();
     [DllImport("user32.dll", CharSet = CharSet.Unicode)] public static extern int GetWindowTextLength(nint hwnd);
     [DllImport("user32.dll", CharSet = CharSet.Unicode)] public static extern int GetWindowText(nint hwnd, StringBuilder text, int max);
     [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(nint hwnd, out int processId);

@@ -27,6 +27,7 @@ public sealed class AutoRulesWindow : Window
     private readonly TextBox _title = new();
     private readonly ComboBox _mode = new();
     private readonly CheckBox _stopOnClose = new();
+    private readonly CheckBox _pauseInBackground = new();
     private readonly CheckBox _enabled = new();
     private readonly StackPanel _editor = new();
     private readonly TextBlock _empty = new();
@@ -140,6 +141,11 @@ public sealed class AutoRulesWindow : Window
         _stopOnClose.Content = Loc.Get("RuleStopOnClose");
         AutomationProperties.SetAutomationId(_stopOnClose, "RuleStopOnCloseCheck");
         _stopOnClose.Click += (_, _) => Apply();
+        _pauseInBackground.Style = (Style)FindResource("Check");
+        _pauseInBackground.Content = new TextBlock { Text = Loc.Get("RulePauseInBackground"), TextWrapping = TextWrapping.Wrap };
+        AutomationProperties.SetAutomationId(_pauseInBackground, "RulePauseInBackgroundCheck");
+        AutomationProperties.SetName(_pauseInBackground, Loc.Get("RulePauseInBackground"));
+        _pauseInBackground.Click += (_, _) => Apply();
 
         _editor.Children.Add(Label("RuleApp"));
         _editor.Children.Add(appRow);
@@ -155,6 +161,7 @@ public sealed class AutoRulesWindow : Window
         _editor.Children.Add(new TextBlock { Text = Loc.Get("RuleTitleHint"), Style = (Style)FindResource("HintText"), Margin = new Thickness(0, 4, 0, 0) });
         _editor.Children.Add(_enabled);
         _editor.Children.Add(_stopOnClose);
+        _editor.Children.Add(_pauseInBackground);
         _empty.Text = Loc.Get("AutoNoRules");
         _empty.Style = (Style)FindResource("HintText");
 
@@ -229,6 +236,7 @@ public sealed class AutoRulesWindow : Window
             _mode.SelectedIndex = row.Rule.TitleMode == TitleMatch.Regex ? 1 : 0;
             _enabled.IsChecked = row.Rule.Enabled;
             _stopOnClose.IsChecked = row.Rule.StopOnClose;
+            _pauseInBackground.IsChecked = row.Rule.PauseInBackground;
         }
         _loading = false;
     }
@@ -243,6 +251,7 @@ public sealed class AutoRulesWindow : Window
         row.Rule.TitleMode = _mode.SelectedIndex == 1 ? TitleMatch.Regex : TitleMatch.Contains;
         row.Enabled = _enabled.IsChecked == true;
         row.Rule.StopOnClose = _stopOnClose.IsChecked == true;
+        row.Rule.PauseInBackground = _pauseInBackground.IsChecked == true;
         row.Refresh();
     }
 
