@@ -13,7 +13,7 @@ namespace SocScreenShare.App.Services;
 /// vigila las ventanas (<see cref="WindowWatcher"/>, en su propio hilo) y, cuando se abre una que
 /// cumple una regla, graba esa ventana con su sonido; al cerrarse, para y guarda. La decisión la toma
 /// <see cref="AutoRecordTracker"/> en el hilo de la interfaz. Si el programa abre otra ventana de la
-/// misma regla mientras graba (TeamViewer: del selector a la conexión), la grabación se pasa a ella.
+/// misma regla mientras graba (un programa de control remoto: del selector a la conexión), la grabación se pasa a ella.
 /// Mientras la aplicación está minimizada o detrás de otra, se pausa y al volver sigue en el mismo
 /// fichero (<see cref="BackgroundPause"/>), si la regla lo pide.
 /// </summary>

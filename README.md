@@ -50,7 +50,7 @@ sitio. Puede **grabar sola** cuando se abre la ventana de una aplicación concre
   interruptor general y uno por regla. Al abrirse una ventana que cumple una regla se graba esa
   ventana con su sonido y la carpeta y calidad de los ajustes; al cerrarse (o esconderse) se para y se
   guarda (opción por regla). Nunca empieza una segunda grabación si ya hay una: si la misma aplicación
-  abre otra ventana de la regla mientras graba (TeamViewer: el selector y luego la conexión), la
+  abre otra ventana de la regla mientras graba (un programa de control remoto: la lista de conexiones y luego la conexión), la
   grabación **se pasa a esa ventana en el mismo fichero**; al cerrarse vuelve a la anterior que siga
   abierta y, sin ninguna, para. Los diálogos (ventanas con dueño) no se llevan la grabación. Aviso discreto junto
   al reloj al empezar y al acabar. La detección usa `SetWinEventHook` (sin sondeo) en un hilo propio.

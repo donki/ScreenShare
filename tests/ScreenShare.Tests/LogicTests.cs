@@ -249,8 +249,8 @@ public sealed class CommandLineTests
     [Fact]
     public void Automatica_comprobar_ayuda_y_version()
     {
-        var a = CommandLine.Parse(["--auto", "Teams.exe", "--title", "Reunión", "--regex", "--timeout", "30"]);
-        Assert.Equal((CliVerb.Auto, "Teams.exe", "Reunión", true, 30.0), (a.Verb, a.AutoProcess, a.AutoTitle, a.AutoRegex, a.TimeoutSeconds));
+        var a = CommandLine.Parse(["--auto", "AppReunion.exe", "--title", "Reunión", "--regex", "--timeout", "30"]);
+        Assert.Equal((CliVerb.Auto, "AppReunion.exe", "Reunión", true, 30.0), (a.Verb, a.AutoProcess, a.AutoTitle, a.AutoRegex, a.TimeoutSeconds));
         Assert.Equal(60, CommandLine.Parse(["--auto", "x"]).TimeoutSeconds);
         Assert.Equal(CliVerb.Probe, CommandLine.Parse(["--probe", "a.mp4"]).Verb);
         Assert.Equal(CliVerb.Record, CommandLine.Parse(["--record", "1", "--probe", "a.mp4"]).Verb);
@@ -363,7 +363,7 @@ public sealed class SettingsTests : IDisposable
             Language = "es", OutputFolder = @"D:\vid", Target = TargetKind.Window, MonitorId = @"\\.\DISPLAY2", Quality = QualityPreset.High,
             SystemAudio = SystemAudioMode.App, AppProcessName = "msedge", SystemVolume = 40, MicEnabled = true, MicDeviceId = "mic1", MicVolume = 70,
             WindowAudio = false, WindowVolume = 55, StartHotkey = "Alt+F7", StopHotkey = "Alt+F8", AutoRecordEnabled = true,
-            AutoRules = [new AutoRecordRule { ProcessName = "Teams", Title = "Reunión", TitleMode = TitleMatch.Regex, StopOnClose = false, PauseInBackground = false }],
+            AutoRules = [new AutoRecordRule { ProcessName = "AppReunion", Title = "Reunión", TitleMode = TitleMatch.Regex, StopOnClose = false, PauseInBackground = false }],
         };
         Assert.True(s.Save());
         var json = File.ReadAllText(RecorderSettings.FilePath);
@@ -373,7 +373,7 @@ public sealed class SettingsTests : IDisposable
         Assert.Equal((true, "mic1", 70, false, 55), (back.MicEnabled, back.MicDeviceId, back.MicVolume, back.WindowAudio, back.WindowVolume));
         Assert.Equal(("Alt+F7", "Alt+F8", true), (back.StartHotkey, back.StopHotkey, back.AutoRecordEnabled));
         var rule = Assert.Single(back.AutoRules);
-        Assert.Equal(("Teams", "Reunión", TitleMatch.Regex, false), (rule.ProcessName, rule.Title, rule.TitleMode, rule.StopOnClose));
+        Assert.Equal(("AppReunion", "Reunión", TitleMatch.Regex, false), (rule.ProcessName, rule.Title, rule.TitleMode, rule.StopOnClose));
         Assert.False(rule.PauseInBackground);
         Assert.False(back.Clone().AutoRules[0].PauseInBackground);
         var copy = back.Clone();
@@ -397,7 +397,7 @@ public sealed class SettingsTests : IDisposable
             { "language": "fr", "outputFolder": "  ", "target": 7, "quality": 9, "systemAudio": 5, "systemVolume": 250,
               "micVolume": -3, "windowVolume": 400, "startHotkey": "Ctrl+Shift+F9", "stopHotkey": "Ctrl+Shift+F9",
               "monitorId": " ", "outputDeviceId": "", "micDeviceId": " ", "appProcessName": "", "windowWidth": -5,
-              "autoRules": [ { "id": "", "processName": "C:\\x\\Teams.exe", "titleMode": 9 }, null ] }
+              "autoRules": [ { "id": "", "processName": "C:\\x\\AppReunion.exe", "titleMode": 9 }, null ] }
             """);
         var s = RecorderSettings.Load();
         Assert.Null(s.Language);
@@ -411,7 +411,7 @@ public sealed class SettingsTests : IDisposable
         Assert.Null(s.AppProcessName);
         Assert.Equal(0, s.WindowWidth);
         var rule = Assert.Single(s.AutoRules);
-        Assert.Equal("Teams", rule.ProcessName);
+        Assert.Equal("AppReunion", rule.ProcessName);
         Assert.Equal(TitleMatch.Contains, rule.TitleMode);
         Assert.NotEmpty(rule.Id);
     }
@@ -454,43 +454,43 @@ public sealed class AutoRecordTests
         new() { ProcessName = proc, Title = title, TitleMode = mode, Enabled = enabled, StopOnClose = stop };
 
     [Theory]
-    [InlineData("Teams", "Teams.exe")]
-    [InlineData("Teams", @"C:\Program Files\Teams\Teams.EXE")]
-    [InlineData("Teams", "  Teams ")]
+    [InlineData("AppReunion", "AppReunion.exe")]
+    [InlineData("AppReunion", @"C:\Program Files\AppReunion\AppReunion.EXE")]
+    [InlineData("AppReunion", "  AppReunion ")]
     [InlineData("", null)]
     public void Nombre_del_ejecutable(string expected, string? input) => Assert.Equal(expected, AutoRecordRule.NormalizeProcess(input));
 
     [Fact]
     public void Coincidencias_por_programa_y_titulo()
     {
-        Assert.True(AutoRecordMatcher.Matches(Rule("teams.exe"), Win("Teams", "Chat")));
-        Assert.False(AutoRecordMatcher.Matches(Rule("Teams"), Win("Zoom", "Chat")));
-        Assert.True(AutoRecordMatcher.Matches(Rule("Teams", "reunión"), Win("Teams", "Reunión semanal")));
-        Assert.False(AutoRecordMatcher.Matches(Rule("Teams", "reunión"), Win("Teams", "Chat")));
-        Assert.True(AutoRecordMatcher.Matches(Rule("Teams", "^Reunión .*semanal$", TitleMatch.Regex), Win("Teams", "reunión muy semanal")));
-        Assert.False(AutoRecordMatcher.Matches(Rule("Teams", "^Reunión$", TitleMatch.Regex), Win("Teams", "Reunión semanal")));
-        Assert.False(AutoRecordMatcher.Matches(Rule("Teams", enabled: false), Win("Teams", "Chat")));
-        Assert.False(AutoRecordMatcher.Matches(Rule("Teams", "(", TitleMatch.Regex), Win("Teams", "(")));   // regex mala: nunca coincide
+        Assert.True(AutoRecordMatcher.Matches(Rule("appreunion.exe"), Win("AppReunion", "Chat")));
+        Assert.False(AutoRecordMatcher.Matches(Rule("AppReunion"), Win("OtraApp", "Chat")));
+        Assert.True(AutoRecordMatcher.Matches(Rule("AppReunion", "reunión"), Win("AppReunion", "Reunión semanal")));
+        Assert.False(AutoRecordMatcher.Matches(Rule("AppReunion", "reunión"), Win("AppReunion", "Chat")));
+        Assert.True(AutoRecordMatcher.Matches(Rule("AppReunion", "^Reunión .*semanal$", TitleMatch.Regex), Win("AppReunion", "reunión muy semanal")));
+        Assert.False(AutoRecordMatcher.Matches(Rule("AppReunion", "^Reunión$", TitleMatch.Regex), Win("AppReunion", "Reunión semanal")));
+        Assert.False(AutoRecordMatcher.Matches(Rule("AppReunion", enabled: false), Win("AppReunion", "Chat")));
+        Assert.False(AutoRecordMatcher.Matches(Rule("AppReunion", "(", TitleMatch.Regex), Win("AppReunion", "(")));   // regex mala: nunca coincide
     }
 
     [Fact]
     public void Se_ignoran_invisibles_herramientas_y_sin_titulo()
     {
-        var rules = new[] { Rule("Teams") };
-        Assert.NotNull(AutoRecordMatcher.Match(rules, Win("Teams", "Chat")));
-        Assert.Null(AutoRecordMatcher.Match(rules, Win("Teams", "Chat", visible: false)));
-        Assert.Null(AutoRecordMatcher.Match(rules, Win("Teams", "Chat", tool: true)));
-        Assert.Null(AutoRecordMatcher.Match(rules, Win("Teams", "")));
-        Assert.Null(AutoRecordMatcher.Match([], Win("Teams", "Chat")));
+        var rules = new[] { Rule("AppReunion") };
+        Assert.NotNull(AutoRecordMatcher.Match(rules, Win("AppReunion", "Chat")));
+        Assert.Null(AutoRecordMatcher.Match(rules, Win("AppReunion", "Chat", visible: false)));
+        Assert.Null(AutoRecordMatcher.Match(rules, Win("AppReunion", "Chat", tool: true)));
+        Assert.Null(AutoRecordMatcher.Match(rules, Win("AppReunion", "")));
+        Assert.Null(AutoRecordMatcher.Match([], Win("AppReunion", "Chat")));
     }
 
     [Fact]
     public void Validar_reglas()
     {
         Assert.Equal("ErrRuleNoApp", Rule("").Validate());
-        Assert.Equal("ErrRuleBadRegex", Rule("Teams", "[", TitleMatch.Regex).Validate());
-        Assert.Null(Rule("Teams", "[", TitleMatch.Contains).Validate());
-        var r = Rule("Teams", "x");
+        Assert.Equal("ErrRuleBadRegex", Rule("AppReunion", "[", TitleMatch.Regex).Validate());
+        Assert.Null(Rule("AppReunion", "[", TitleMatch.Contains).Validate());
+        var r = Rule("AppReunion", "x");
         var c = r.Clone();
         Assert.Equal((r.Id, r.ProcessName, r.Title), (c.Id, c.ProcessName, c.Title));
         Assert.NotSame(r, c);
@@ -500,15 +500,15 @@ public sealed class AutoRecordTests
     public void Empieza_al_abrirse_y_para_al_cerrarse()
     {
         var t = new AutoRecordTracker();
-        var rules = new[] { Rule("Teams", "Reunión") };
-        Assert.Equal(AutoAction.None, t.OnEvent(WindowEventKind.Shown, 7, Win("Teams", "Chat"), rules, true, false).Action);
-        var start = t.OnEvent(WindowEventKind.TitleChanged, 7, Win("Teams", "Reunión semanal"), rules, true, false);
+        var rules = new[] { Rule("AppReunion", "Reunión") };
+        Assert.Equal(AutoAction.None, t.OnEvent(WindowEventKind.Shown, 7, Win("AppReunion", "Chat"), rules, true, false).Action);
+        var start = t.OnEvent(WindowEventKind.TitleChanged, 7, Win("AppReunion", "Reunión semanal"), rules, true, false);
         Assert.Equal((AutoAction.Start, (nint)7), (start.Action, start.Window));
         Assert.Equal(7, t.CurrentWindow);
         Assert.Same(rules[0], t.CurrentRule);
         // Otra ventana que cambia de título no hace nada; la misma tampoco vuelve a empezar.
         Assert.Equal(AutoAction.None, t.OnEvent(WindowEventKind.Hidden, 8, null, rules, true, true).Action);
-        Assert.Equal(AutoAction.None, t.OnEvent(WindowEventKind.TitleChanged, 7, Win("Teams", "Reunión 2"), rules, true, true).Action);
+        Assert.Equal(AutoAction.None, t.OnEvent(WindowEventKind.TitleChanged, 7, Win("AppReunion", "Reunión 2"), rules, true, true).Action);
         var stop = t.OnEvent(WindowEventKind.Destroyed, 7, null, rules, true, true);
         Assert.Equal(AutoAction.Stop, stop.Action);
         Assert.Equal(0, t.CurrentWindow);
@@ -518,9 +518,9 @@ public sealed class AutoRecordTests
     public void Nunca_una_segunda_grabacion_ni_con_el_interruptor_apagado()
     {
         var t = new AutoRecordTracker();
-        var rules = new[] { Rule("Teams") };
-        Assert.Equal(AutoAction.None, t.OnEvent(WindowEventKind.Shown, 7, Win("Teams", "Chat"), rules, enabled: true, recording: true).Action);
-        Assert.Equal(AutoAction.None, t.OnEvent(WindowEventKind.Shown, 7, Win("Teams", "Chat"), rules, enabled: false, recording: false).Action);
+        var rules = new[] { Rule("AppReunion") };
+        Assert.Equal(AutoAction.None, t.OnEvent(WindowEventKind.Shown, 7, Win("AppReunion", "Chat"), rules, enabled: true, recording: true).Action);
+        Assert.Equal(AutoAction.None, t.OnEvent(WindowEventKind.Shown, 7, Win("AppReunion", "Chat"), rules, enabled: false, recording: false).Action);
         Assert.Equal(AutoAction.None, t.OnEvent(WindowEventKind.Shown, 7, null, rules, true, false).Action);
     }
 
@@ -528,20 +528,20 @@ public sealed class AutoRecordTests
     public void Parada_a_mano_no_vuelve_a_empezar_hasta_que_la_ventana_se_cierra()
     {
         var t = new AutoRecordTracker();
-        var rules = new[] { Rule("Teams") };
-        Assert.Equal(AutoAction.Start, t.OnEvent(WindowEventKind.Shown, 7, Win("Teams", "Chat"), rules, true, false).Action);
+        var rules = new[] { Rule("AppReunion") };
+        Assert.Equal(AutoAction.Start, t.OnEvent(WindowEventKind.Shown, 7, Win("AppReunion", "Chat"), rules, true, false).Action);
         t.Clear();   // se paró a mano
-        Assert.Equal(AutoAction.None, t.OnEvent(WindowEventKind.TitleChanged, 7, Win("Teams", "Chat 2"), rules, true, false).Action);
+        Assert.Equal(AutoAction.None, t.OnEvent(WindowEventKind.TitleChanged, 7, Win("AppReunion", "Chat 2"), rules, true, false).Action);
         Assert.Equal(AutoAction.None, t.OnEvent(WindowEventKind.Destroyed, 7, null, rules, true, false).Action);
-        Assert.Equal(AutoAction.Start, t.OnEvent(WindowEventKind.Shown, 7, Win("Teams", "Chat"), rules, true, false).Action);   // el mismo identificador, otra ventana
+        Assert.Equal(AutoAction.Start, t.OnEvent(WindowEventKind.Shown, 7, Win("AppReunion", "Chat"), rules, true, false).Action);   // el mismo identificador, otra ventana
     }
 
     [Fact]
     public void Sin_parar_al_cerrarse_la_grabacion_sigue()
     {
         var t = new AutoRecordTracker();
-        var rules = new[] { Rule("Teams", stop: false) };
-        t.OnEvent(WindowEventKind.Shown, 7, Win("Teams", "Chat"), rules, true, false);
+        var rules = new[] { Rule("AppReunion", stop: false) };
+        t.OnEvent(WindowEventKind.Shown, 7, Win("AppReunion", "Chat"), rules, true, false);
         Assert.Equal(AutoAction.None, t.OnEvent(WindowEventKind.Hidden, 7, null, rules, true, true).Action);
         Assert.Equal(7, t.CurrentWindow);   // escondida no es cerrada: sigue siendo la suya
         Assert.Equal(AutoAction.None, t.OnEvent(WindowEventKind.Destroyed, 7, null, rules, true, true).Action);
@@ -551,17 +551,17 @@ public sealed class AutoRecordTests
     [Fact]
     public void Sigue_a_la_ventana_nueva_del_programa_y_vuelve_al_cerrarse()
     {
-        // TeamViewer: primero el selector (7), luego la conexión (8) en otra ventana.
+        // Control remoto: primero el selector (7), luego la conexión (8) en otra ventana.
         var t = new AutoRecordTracker();
-        var rules = new[] { Rule("TeamViewer") };
-        Assert.Equal(AutoAction.Start, t.OnEvent(WindowEventKind.Shown, 7, Win("TeamViewer", "TeamViewer"), rules, true, false).Action);
-        var to8 = t.OnEvent(WindowEventKind.Shown, 8, Win("TeamViewer", "Conexión", h: 8), rules, true, true);
+        var rules = new[] { Rule("AppRemota") };
+        Assert.Equal(AutoAction.Start, t.OnEvent(WindowEventKind.Shown, 7, Win("AppRemota", "AppRemota"), rules, true, false).Action);
+        var to8 = t.OnEvent(WindowEventKind.Shown, 8, Win("AppRemota", "Conexión", h: 8), rules, true, true);
         Assert.Equal((AutoAction.Switch, (nint)8), (to8.Action, to8.Window));
         Assert.Equal(8, t.CurrentWindow);
         // Ni su cambio de título, ni un diálogo del programa, ni otro programa se llevan la grabación.
-        Assert.Equal(AutoAction.None, t.OnEvent(WindowEventKind.TitleChanged, 8, Win("TeamViewer", "Conexión 2", h: 8), rules, true, true).Action);
-        Assert.Equal(AutoAction.None, t.OnEvent(WindowEventKind.Shown, 9, Win("TeamViewer", "Contraseña", h: 9, owned: true), rules, true, true).Action);
-        Assert.Equal(AutoAction.None, t.OnEvent(WindowEventKind.Shown, 10, Win("Teams", "Chat", h: 10), [.. rules, Rule("Teams")], true, true).Action);
+        Assert.Equal(AutoAction.None, t.OnEvent(WindowEventKind.TitleChanged, 8, Win("AppRemota", "Conexión 2", h: 8), rules, true, true).Action);
+        Assert.Equal(AutoAction.None, t.OnEvent(WindowEventKind.Shown, 9, Win("AppRemota", "Contraseña", h: 9, owned: true), rules, true, true).Action);
+        Assert.Equal(AutoAction.None, t.OnEvent(WindowEventKind.Shown, 10, Win("AppReunion", "Chat", h: 10), [.. rules, Rule("AppReunion")], true, true).Action);
         // Se cierra la conexión: de vuelta al selector, que sigue abierto; al cerrarse este, para.
         var back = t.OnEvent(WindowEventKind.Destroyed, 8, null, rules, true, true);
         Assert.Equal((AutoAction.Switch, (nint)7), (back.Action, back.Window));
@@ -573,17 +573,17 @@ public sealed class AutoRecordTests
     public void La_de_atras_cerrada_se_olvida_y_si_no_se_puede_pasar_se_para()
     {
         var t = new AutoRecordTracker();
-        var rules = new[] { Rule("TeamViewer") };
-        t.OnEvent(WindowEventKind.Shown, 7, Win("TeamViewer", "TeamViewer"), rules, true, false);
-        t.OnEvent(WindowEventKind.Shown, 8, Win("TeamViewer", "Conexión", h: 8), rules, true, true);
+        var rules = new[] { Rule("AppRemota") };
+        t.OnEvent(WindowEventKind.Shown, 7, Win("AppRemota", "AppRemota"), rules, true, false);
+        t.OnEvent(WindowEventKind.Shown, 8, Win("AppRemota", "Conexión", h: 8), rules, true, true);
         // El selector se esconde mientras se graba la conexión: no cambia nada, pero ya no se vuelve a él.
         Assert.Equal(AutoAction.None, t.OnEvent(WindowEventKind.Hidden, 7, null, rules, true, true).Action);
         Assert.Equal(8, t.CurrentWindow);
         Assert.Equal(AutoAction.Stop, t.OnEvent(WindowEventKind.Destroyed, 8, null, rules, true, true).Action);
 
         // Pasar a la nueva falla (ya cerrada o minimizada): se sigue con la de antes.
-        t.OnEvent(WindowEventKind.Shown, 20, Win("TeamViewer", "TeamViewer", h: 20), rules, true, false);
-        var to21 = t.OnEvent(WindowEventKind.Shown, 21, Win("TeamViewer", "Conexión", h: 21), rules, true, true);
+        t.OnEvent(WindowEventKind.Shown, 20, Win("AppRemota", "AppRemota", h: 20), rules, true, false);
+        var to21 = t.OnEvent(WindowEventKind.Shown, 21, Win("AppRemota", "Conexión", h: 21), rules, true, true);
         var again = t.SwitchFailed(to21.Window, rules, recording: true);
         Assert.Equal((AutoAction.Switch, (nint)20), (again.Action, again.Window));
         // Y si la única que queda tampoco se puede, se para.
@@ -594,15 +594,15 @@ public sealed class AutoRecordTests
     public void Grabando_a_mano_no_se_cambia_de_ventana()
     {
         var t = new AutoRecordTracker();
-        Assert.Equal(AutoAction.None, t.OnEvent(WindowEventKind.Shown, 8, Win("TeamViewer", "Conexión", h: 8), [Rule("TeamViewer")], true, recording: true).Action);
+        Assert.Equal(AutoAction.None, t.OnEvent(WindowEventKind.Shown, 8, Win("AppRemota", "Conexión", h: 8), [Rule("AppRemota")], true, recording: true).Action);
     }
 
     [Fact]
     public void Esconderse_tambien_para_si_la_regla_lo_dice()
     {
         var t = new AutoRecordTracker();
-        var rules = new[] { Rule("Teams") };
-        t.OnEvent(WindowEventKind.Shown, 7, Win("Teams", "Chat"), rules, true, false);
+        var rules = new[] { Rule("AppReunion") };
+        t.OnEvent(WindowEventKind.Shown, 7, Win("AppReunion", "Chat"), rules, true, false);
         Assert.Equal(AutoAction.Stop, t.OnEvent(WindowEventKind.Hidden, 7, null, rules, true, true).Action);
         Assert.Equal(AutoAction.None, t.OnEvent(WindowEventKind.Destroyed, 7, null, rules, true, false).Action);
     }
@@ -627,7 +627,7 @@ public sealed class AutoRecordTests
     [Fact]
     public void Pausa_al_quedar_detras_y_sigue_al_volver()
     {
-        var rule = Rule("Teams");
+        var rule = Rule("AppReunion");
         Assert.Equal(AutoAction.Pause, BackgroundPause.Decide(rule, false, recording: true, paused: false, pausedByUs: false));
         Assert.Equal(AutoAction.Resume, BackgroundPause.Decide(rule, true, recording: false, paused: true, pausedByUs: true));
         // Ya en pausa y sigue detrás, o grabando y delante: nada.
@@ -638,21 +638,21 @@ public sealed class AutoRecordTests
     [Fact]
     public void Una_pausa_a_mano_no_se_quita_sola()
     {
-        var rule = Rule("Teams");
+        var rule = Rule("AppReunion");
         Assert.Equal(AutoAction.None, BackgroundPause.Decide(rule, true, recording: false, paused: true, pausedByUs: false));
     }
 
     [Fact]
     public void Sin_saber_si_esta_delante_o_sin_regla_no_se_toca()
     {
-        Assert.Equal(AutoAction.None, BackgroundPause.Decide(Rule("Teams"), null, recording: true, paused: false, pausedByUs: false));
+        Assert.Equal(AutoAction.None, BackgroundPause.Decide(Rule("AppReunion"), null, recording: true, paused: false, pausedByUs: false));
         Assert.Equal(AutoAction.None, BackgroundPause.Decide(null, false, recording: true, paused: false, pausedByUs: false));
     }
 
     [Fact]
     public void Con_la_casilla_quitada_no_pausa_y_suelta_la_pausa_que_puso()
     {
-        var rule = Rule("Teams");
+        var rule = Rule("AppReunion");
         rule.PauseInBackground = false;
         Assert.Equal(AutoAction.None, BackgroundPause.Decide(rule, false, recording: true, paused: false, pausedByUs: false));
         Assert.Equal(AutoAction.Resume, BackgroundPause.Decide(rule, false, recording: false, paused: true, pausedByUs: true));

@@ -22,7 +22,7 @@ public sealed class AutoRecordRule
     public string Id { get; set; } = Guid.NewGuid().ToString("N");
     public bool Enabled { get; set; } = true;
 
-    /// <summary>Nombre del ejecutable, sin «.exe» (p. ej. «Teams»).</summary>
+    /// <summary>Nombre del ejecutable, sin «.exe» (p. ej. «AppReunion»).</summary>
     public string ProcessName { get; set; } = string.Empty;
 
     /// <summary>Filtro del título; vacío = cualquier ventana de la aplicación.</summary>
@@ -36,7 +36,7 @@ public sealed class AutoRecordRule
     /// <summary>Pausar mientras la aplicación está minimizada o detrás de otra, y seguir al volver.</summary>
     public bool PauseInBackground { get; set; } = true;
 
-    /// <summary>«Teams.exe», «C:\…\Teams.exe» o «Teams» → «Teams».</summary>
+    /// <summary>«AppReunion.exe», «C:\…\AppReunion.exe» o «AppReunion» → «AppReunion».</summary>
     public static string NormalizeProcess(string? name)
     {
         if (string.IsNullOrWhiteSpace(name))
@@ -155,7 +155,7 @@ public static class BackgroundPause
             return false;
         if (foregroundPid == 0 || foregroundPid == ownPid)
             return null;
-        // Cualquier ventana del mismo programa cuenta como delante (sus diálogos, la lista de TeamViewer).
+        // Cualquier ventana del mismo programa cuenta como delante (sus diálogos, la lista de conexiones).
         return foregroundPid == targetPid;
     }
 
@@ -189,7 +189,7 @@ public sealed record AutoDecision(AutoAction Action, AutoRecordRule? Rule = null
 /// abierta, aunque cambie de título). Nunca empieza una segunda grabación si ya hay una en marcha.
 /// <para>
 /// Mientras graba, la grabación sigue a la ventana más reciente de la misma regla: hay programas que
-/// abren primero una ventana para elegir y lo que interesa sale en otra (TeamViewer: el selector y
+/// abren primero una ventana para elegir y lo que interesa sale en otra (un programa de control remoto: el selector y
 /// luego la conexión). Esa otra pasa a grabarse en el mismo fichero; al cerrarse, se vuelve a la
 /// anterior que siga abierta, y cuando no queda ninguna, se para. Las ventanas con dueño (diálogos
 /// del programa) no se llevan la grabación.

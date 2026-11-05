@@ -1,12 +1,24 @@
 # Changelog — sOC ScreenShare
 
+## 2026.11.5.0 — Sin nombres comerciales de terceros · No third-party brand names
+
+**Español**
+
+- Los textos, las novedades y las capturas ya no nombran productos ajenos como ejemplo: se describe qué
+  hacen («un programa de control remoto», «una aplicación de reuniones»).
+
+**English**
+
+- Texts, what's new and screenshots no longer name other companies' products as examples: they describe
+  what they do ("a remote control program", "a meetings app").
+
 ## 2026.11.1.0 — La grabación automática se pausa en segundo plano; Microsoft Store · Automatic recording pauses in the background; Microsoft Store
 
 **Español**
 
 - **La grabación automática se pausa mientras la aplicación no está delante**: si se minimiza o pasa
   otra aplicación al primer plano, la grabación se pausa; cuando vuelve, sigue **en el mismo vídeo**.
-  Cuentan como «delante» todas las ventanas del mismo programa (sus diálogos, la lista de TeamViewer)
+  Cuentan como «delante» todas las ventanas del mismo programa (sus diálogos, la lista de conexiones)
   y no cuenta sOC ScreenShare (abrir su menú de la bandeja no pausa ni reanuda). Espera 0,4 s antes de
   decidir, para no cortar al pasar por la barra de tareas o Alt+Tab. Una pausa puesta a mano no se
   quita sola. Casilla nueva en cada regla, activada por defecto: «Pausar mientras la aplicación está
@@ -19,7 +31,7 @@
 
 - **Automatic recording pauses while the app is not in front**: if it is minimized or another app
   comes to the foreground, the recording pauses; when it comes back, it carries on **in the same
-  video**. Every window of the same program counts as "in front" (its dialogs, TeamViewer's list) and
+  video**. Every window of the same program counts as "in front" (its dialogs, the connection list) and
   sOC ScreenShare does not (opening its tray menu neither pauses nor resumes). It waits 0.4 s before
   deciding, so going through the taskbar or Alt+Tab does not cut it. A pause you set yourself is not
   lifted on its own. New box in each rule, on by default: "Pause while the app is minimized or behind
@@ -33,7 +45,7 @@
 **Español**
 
 - **La grabación automática sigue a la ventana nueva del programa**: si mientras graba la misma
-  aplicación abre otra ventana de la regla (TeamViewer abre primero la lista de conexiones y la
+  aplicación abre otra ventana de la regla (un programa de control remoto abre primero la lista de conexiones y la
   conexión sale en otra ventana), la grabación se pasa a ella **en el mismo vídeo**. Al cerrarse,
   vuelve a la anterior si sigue abierta y, si no queda ninguna, para y guarda. Los diálogos del
   programa no se llevan la grabación.
@@ -41,7 +53,7 @@
 **English**
 
 - **Automatic recording follows the app's new window**: if, while recording, the same app opens
-  another window that matches the rule (TeamViewer first opens the connection list and the connection
+  another window that matches the rule (a remote control program first opens the connection list and the connection
   appears in a different window), the recording moves to it **in the same video**. When it closes, it
   goes back to the previous one if it is still open and, if none is left, stops and saves. The app's
   dialogs do not take the recording.

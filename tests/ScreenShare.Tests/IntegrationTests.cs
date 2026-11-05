@@ -157,7 +157,7 @@ public sealed class IntegrationTests : IDisposable
     [IntegrationFact]
     public async Task La_regla_sigue_a_la_segunda_ventana_del_programa_en_el_mismo_fichero()
     {
-        // Como TeamViewer: una ventana abierta (el selector) y luego otra del mismo programa (la conexión).
+        // Como un programa de control remoto: una ventana abierta (el selector) y luego otra del mismo programa (la conexión).
         var title = "SCS seguir " + Guid.NewGuid().ToString("N")[..6];
         var events = Channel.CreateUnbounded<(WindowEventKind Kind, nint Hwnd, WindowInfo? Info)>();
         using var watcher = new WindowWatcher();

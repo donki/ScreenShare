@@ -112,13 +112,13 @@ public sealed class MainWindowTests
         ScsApp.Press(app.Button(app.Main, "AutoRulesButton"));
         var rules = app.WaitModal();
         ScsApp.Press(app.Button(rules, "AddRuleButton"));
-        app.ById(rules, "RuleAppBox").AsTextBox().Text = "Teams.exe";
+        app.ById(rules, "RuleAppBox").AsTextBox().Text = "AppReunion.exe";
         app.ById(rules, "RuleTitleBox").AsTextBox().Text = "Reunión";
         app.Capture(rules, "regla");
         ScsApp.Press(app.Button(rules, "SaveButton"));
         app.WaitNoModal();
         var s = app.Settings();
-        Assert.Contains("\"processName\": \"Teams\"", s);
+        Assert.Contains("\"processName\": \"AppReunion\"", s);
         Assert.Contains("\"title\": \"Reunión\"", s);
         Assert.Contains("1 de 1", app.ById(app.Main, "AutoSummaryText").Name);
     }

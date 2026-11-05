@@ -1,5 +1,15 @@
 [
   {
+    "version": "2026.11.5.0",
+    "date": "2026-11-05",
+    "es": [
+      "Los textos y las novedades ya no nombran productos ajenos como ejemplo: se describe qué hacen."
+    ],
+    "en": [
+      "Texts and what's new no longer name other companies' products as examples: they describe what they do."
+    ]
+  },
+  {
     "version": "2026.11.1.0",
     "date": "2026-11-01",
     "es": [
@@ -13,10 +23,10 @@
     "version": "2026.10.15.0",
     "date": "2026-10-15",
     "es": [
-      "La grabación automática sigue a la ventana nueva del programa: si mientras graba la misma aplicación abre otra ventana (TeamViewer abre primero la lista de conexiones y la conexión sale en otra), se pasa a grabar esa, en el mismo vídeo. Al cerrarla vuelve a la anterior y, si no queda ninguna, para y guarda."
+      "La grabación automática sigue a la ventana nueva del programa: si mientras graba la misma aplicación abre otra ventana (un programa de control remoto abre primero la lista de conexiones y la conexión sale en otra), se pasa a grabar esa, en el mismo vídeo. Al cerrarla vuelve a la anterior y, si no queda ninguna, para y guarda."
     ],
     "en": [
-      "Automatic recording follows the app's new window: if, while recording, the same app opens another window (TeamViewer first opens the connection list and the connection appears in another one), it moves on to record that one, in the same video. When it closes it goes back to the previous one and, if none is left, stops and saves."
+      "Automatic recording follows the app's new window: if, while recording, the same app opens another window (a remote control program first opens the connection list and the connection appears in another one), it moves on to record that one, in the same video. When it closes it goes back to the previous one and, if none is left, stops and saves."
     ]
   },
   {
