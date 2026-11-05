@@ -1,5 +1,19 @@
 # Changelog — sOC ScreenShare
 
+## Extensión 2026.11.5.0 — Grabar una pestaña · Record a tab
+
+**Español**
+
+- **Extensión nueva para Edge y navegadores Chromium** (carpeta `Extension`): graba una pestaña en MP4
+  aunque esté detrás de otras y con el sonido silenciado, en Windows o en la propia pestaña; con
+  opción de que el vídeo ocupe toda la imagen. Los vídeos con protección anticopia salen en negro.
+
+**English**
+
+- **New extension for Edge and Chromium browsers** (`Extension` folder): records a tab to MP4 even when it
+  is behind others and with sound muted, in Windows or on the tab itself; the video can fill the
+  whole picture. Copy-protected videos come out black.
+
 ## 2026.11.5.0 — Sin nombres comerciales de terceros · No third-party brand names
 
 **Español**

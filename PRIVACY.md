@@ -5,6 +5,8 @@
 **sOC ScreenShare no recoge ningún dato.** No hay servidor propio, ni cuentas, ni telemetría, ni
 anuncios, y nada se vende ni se comparte con terceros. La aplicación no se conecta a internet.
 
+- **La extensión del navegador** graba solo la pestaña en la que la activas, solo mientras grabas, y guarda el
+  vídeo en tu carpeta de descargas. No envía nada a ningún sitio ni lee tu navegación.
 - **Las grabaciones** se guardan solo en la carpeta que elijas de tu equipo. La aplicación no las sube
   a ningún sitio; si las compartes, lo haces tú.
 - **Imagen y sonido**: solo mientras grabas, y solo lo que eliges (una pantalla, todas o una ventana;
@@ -25,6 +27,8 @@ Contacto: a través de https://github.com/donki/ScreenShare/issues
 **sOC ScreenShare collects no data.** There is no server of our own, no accounts, no telemetry, no
 ads, and nothing is sold or shared with third parties. The app does not connect to the internet.
 
+- **The browser extension** records only the tab you turn it on for, only while recording, and saves the
+  video to your downloads folder. It sends nothing anywhere and does not read your browsing.
 - **Recordings** are saved only in the folder you choose on your computer. The app never uploads
   them; if you share them, you do it yourself.
 - **Picture and sound**: only while you record, and only what you choose (one screen, all of them or

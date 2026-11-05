@@ -3,6 +3,7 @@
 Graba **una pantalla, todas o una ventana** con su sonido en un **MP4 listo para compartir**
 (H.264 + AAC, ligero por defecto), con un par de clics o con un atajo de teclado desde cualquier
 sitio. Puede **grabar sola** cuando se abre la ventana de una aplicación concreta.
+Con su **extensión**, graba **una pestaña del navegador** aunque esté detrás y con el sonido silenciado.
 
 ## Dónde conseguirla
 
@@ -59,6 +60,26 @@ sitio. Puede **grabar sola** cuando se abre la ventana de una aplicación concre
 - Carpeta de destino elegible y recordada (por defecto `Vídeos\ScreenShare`), nombre con fecha y hora
   (`Grabación 2026-10-12 15.30.05.mp4`), ajustes en JSON, español e inglés, tema claro y oscuro
   siguiendo a Windows, guía de configuración, novedades y «Acerca de».
+
+## Grabar una pestaña del navegador
+
+Una pestaña que no está delante no se dibuja, así que la aplicación no puede capturarla. Para eso está
+la **extensión** de `Extension/`, para Edge y otros navegadores Chromium (versión 126 o posterior):
+
+- Graba **la pestaña** en MP4 (H.264 + AAC) aunque se cambie a otra pestaña o la ventana quede detrás.
+- **Con el sonido silenciado**: lo toma dentro del navegador, antes de la salida, así que da igual
+  el silencio de Windows, el volumen o silenciar la pestaña. Por defecto ni suena por los altavoces;
+  se puede activar «Seguir oyéndolo mientras graba».
+- **«Vídeo a toda la pestaña»**: el vídeo más grande de la página ocupa toda la imagen. Al acabar, la
+  página vuelve a como estaba. También vale el botón de pantalla completa del propio reproductor:
+  mientras se graba, se queda dentro de la pestaña aunque se cambie a otra.
+- Resolución de 720p a 2160p y 24, 30 o 60 imágenes/s. Se guarda en `Descargas\ScreenShare`. Si se
+  cierra la pestaña, se guarda lo grabado hasta entonces.
+- **Los vídeos con protección anticopia salen en negro**: el navegador no los entrega y no se esquiva.
+
+Instalarla: en `edge://extensions`, activar «Modo de desarrollador», «Cargar desempaquetada» y elegir la
+carpeta `Extension`. Para usarla: abrir la pestaña, pulsar el icono de la extensión y el botón de grabar;
+para parar, el mismo icono (lleva la marca REC). Prueba real en Edge: `python Extension/tests/prueba.py`.
 
 ## Línea de órdenes
 

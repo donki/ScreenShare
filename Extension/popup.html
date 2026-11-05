@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header><img src="icons/icon32.png" alt=""><span data-i18n="name"></span></header>
+
+  <section id="idle">
+    <label class="row"><span data-i18n="resolution"></span>
+      <select id="resolution">
+        <option value="720">720p</option><option value="1080">1080p</option>
+        <option value="1440">1440p</option><option value="2160">2160p</option>
+      </select>
+    </label>
+    <label class="row"><span data-i18n="fps"></span>
+      <select id="fps"><option>24</option><option>30</option><option>60</option></select>
+    </label>
+    <label class="check"><input type="checkbox" id="fill"><span data-i18n="fill"></span></label>
+    <label class="check"><input type="checkbox" id="keepSound"><span data-i18n="keepSound"></span></label>
+    <p data-i18n="hint"></p>
+    <button id="start" class="primary" data-i18n-title="start">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg>
+    </button>
+  </section>
+
+  <section id="busy" hidden>
+    <p id="title"></p>
+    <p id="time">00:00</p>
+    <button id="stop" class="danger" data-i18n-title="stop">
+      <svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>
+    </button>
+  </section>
+
+  <p id="message" role="status"></p>
+  <script src="popup.js"></script>
+</body>
+</html>

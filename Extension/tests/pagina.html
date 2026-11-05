@@ -1,0 +1,17 @@
+<!doctype html>
+<meta charset="utf-8"><title>Prueba de pestaña</title>
+<body style="margin:0;background:#222">
+<canvas id="c" width="1280" height="720" style="width:640px;height:360px"></canvas>
+<script>
+// Imagen que cambia y un tono continuo: si la grabación los recoge con la pestaña detrás, va bien.
+const c = document.getElementById("c").getContext("2d"), t0 = performance.now();
+function frame() {
+  const s = ((performance.now() - t0) / 1000) % 10;
+  c.fillStyle = `hsl(${s * 36} 80% 40%)`; c.fillRect(0, 0, 1280, 720);
+  c.fillStyle = "#fff"; c.font = "200px sans-serif"; c.fillText(s.toFixed(1), 400, 420);
+  requestAnimationFrame(frame);
+}
+frame();
+const a = new AudioContext(), o = a.createOscillator(), g = a.createGain();
+g.gain.value = 0.3; o.frequency.value = 440; o.connect(g).connect(a.destination); o.start();
+</script>

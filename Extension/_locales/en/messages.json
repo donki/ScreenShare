@@ -1,0 +1,13 @@
+{
+  "name": { "message": "sOC ScreenShare" },
+  "description": { "message": "Records a tab even when it is behind others or the computer is muted, to an MP4 with its sound." },
+  "fileName": { "message": "Recording" },
+  "resolution": { "message": "Resolution" },
+  "fps": { "message": "Frames per second" },
+  "fill": { "message": "Video fills the tab" },
+  "keepSound": { "message": "Keep hearing it while recording" },
+  "hint": { "message": "You can switch tabs or mute the computer: recording carries on with its sound. Copy-protected videos come out black." },
+  "start": { "message": "Record this tab" },
+  "stop": { "message": "Stop and save" },
+  "error": { "message": "Could not record" }
+}
