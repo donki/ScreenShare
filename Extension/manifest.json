@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "__MSG_name__",
   "description": "__MSG_description__",
-  "version": "2026.11.5.0",
+  "version": "2026.11.5.1",
   "default_locale": "es",
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAptFrIpAgS/Lcj3T5qhkPpZCawJRW+mVDQtQ3OIDngbB4pG33VDsjMSxdCboEUajk3qB0DRcM1HwJ161L0fYeYASy8GwJ5SvNmRsLMgbEi/MRNkcbkWV/PCJuL7gQz6SQTskhFN0gWwhZ0eRjyoE21DEbVFFqgUO996hMEliKaT0eSFep030IXtBK/zmWZ+MJ0uHeFkOjTbJsnUW6UvrE6tiyNv7w4GM1MI5oIOTQ4mF3Z0kl74ydUbwVrt7sbZx0iRm+A4RE6b9XWUpas84z1iwRUZQ5r596+YgyDp/UZvS2FVClBwQmcGRiWdQVftRyXMcWrXe8t43Vbvo6hKIBjwIDAQAB",
   "minimum_chrome_version": "126",

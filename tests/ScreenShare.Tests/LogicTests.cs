@@ -10,6 +10,43 @@ using SocScreenShare.Video;
 
 namespace SocScreenShare.Tests;
 
+public class RecordingLimitTests
+{
+    [Theory]
+    [InlineData("", "", "", 0)]
+    [InlineData("00", "00", "00", 0)]
+    [InlineData("01", "30", "00", 5400)]
+    [InlineData("0", "90", "5", 5405)]
+    [InlineData("a", "1", null, 60)]
+    [InlineData("99", "99", "99", RecordingLimit.MaxSeconds)]
+    public void Las_casillas_se_pasan_a_segundos(string? hours, string? minutes, string? seconds, int expected) =>
+        Assert.Equal(expected, RecordingLimit.ToSeconds(hours, minutes, seconds));
+
+    [Fact]
+    public void Se_ensena_como_el_contador()
+    {
+        Assert.Equal((1, 30, 5), RecordingLimit.Split(5405));
+        Assert.Equal("01:30:05", RecordingLimit.Format(5405));
+        Assert.Equal("00:00:00", RecordingLimit.Format(-3));
+    }
+
+    [Fact]
+    public void Por_defecto_no_hay_limite()
+    {
+        Assert.Equal(0, new RecorderSettings().MaxRecordingSeconds);
+        Assert.False(RecordingLimit.Reached(TimeSpan.FromDays(4), 0));
+        Assert.False(RecordingLimit.Reached(TimeSpan.FromSeconds(9.9), 10));
+        Assert.True(RecordingLimit.Reached(TimeSpan.FromSeconds(10), 10));
+    }
+
+    [Fact]
+    public void Un_valor_guardado_fuera_de_rango_se_corrige()
+    {
+        Assert.Equal(0, new RecorderSettings { MaxRecordingSeconds = -5 }.Normalize().MaxRecordingSeconds);
+        Assert.Equal(RecordingLimit.MaxSeconds, new RecorderSettings { MaxRecordingSeconds = int.MaxValue }.Normalize().MaxRecordingSeconds);
+    }
+}
+
 /// <summary>Las pruebas que cambian algo estático (registro, rutas, idioma) no corren a la vez.</summary>
 [CollectionDefinition("estado global")]
 public sealed class GlobalStateCollection;

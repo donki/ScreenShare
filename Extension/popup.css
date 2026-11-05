@@ -10,6 +10,8 @@ header { display: flex; align-items: center; gap: 8px; font-weight: 600; font-si
 header img { width: 20px; height: 20px; }
 .row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
 select { padding: 4px 6px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--text); font: inherit; }
+.limit { display: flex; align-items: center; gap: 2px; }
+.limit input { width: 40px; padding: 4px 2px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--text); font: inherit; text-align: center; }
 .check { display: flex; gap: 8px; align-items: flex-start; margin-bottom: 8px; }
 p { margin: 8px 0; color: var(--muted); line-height: 1.35; }
 button { display: flex; justify-content: center; width: 100%; padding: 8px; border: 0; border-radius: 8px; cursor: pointer; color: #fff; }

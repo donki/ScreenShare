@@ -1,13 +1,53 @@
 {
-  "name": { "message": "sOC ScreenShare" },
-  "description": { "message": "Graba una pestaña aunque esté detrás o el equipo en silencio, en un MP4 con su sonido." },
-  "fileName": { "message": "Grabación" },
-  "resolution": { "message": "Resolución" },
-  "fps": { "message": "Imágenes por segundo" },
-  "fill": { "message": "Vídeo a toda la pestaña" },
-  "keepSound": { "message": "Seguir oyéndolo mientras graba" },
-  "hint": { "message": "Puedes cambiar de pestaña o silenciar el equipo: la grabación sigue con su sonido. Los vídeos con protección anticopia salen en negro." },
-  "start": { "message": "Grabar esta pestaña" },
-  "stop": { "message": "Parar y guardar" },
-  "error": { "message": "No se ha podido grabar" }
+  "name": {
+    "message": "sOC ScreenShare"
+  },
+  "description": {
+    "message": "Graba una pestaña aunque esté detrás o el equipo en silencio, en un MP4 con su sonido."
+  },
+  "fileName": {
+    "message": "Grabación"
+  },
+  "resolution": {
+    "message": "Resolución"
+  },
+  "fps": {
+    "message": "Imágenes por segundo"
+  },
+  "fill": {
+    "message": "Vídeo a toda la pestaña"
+  },
+  "keepSound": {
+    "message": "Seguir oyéndolo mientras graba"
+  },
+  "hint": {
+    "message": "Puedes cambiar de pestaña o silenciar el equipo: la grabación sigue con su sonido. Los vídeos con protección anticopia salen en negro."
+  },
+  "start": {
+    "message": "Grabar esta pestaña"
+  },
+  "stop": {
+    "message": "Parar y guardar"
+  },
+  "error": {
+    "message": "No se ha podido grabar"
+  },
+  "limit": {
+    "message": "Duración"
+  },
+  "limitHours": {
+    "message": "Horas"
+  },
+  "limitMinutes": {
+    "message": "Minutos"
+  },
+  "limitSeconds": {
+    "message": "Segundos"
+  },
+  "limitNone": {
+    "message": "Sin límite: graba hasta que la pares."
+  },
+  "limitAt": {
+    "message": "Se para y se guarda sola a las {0}."
+  }
 }

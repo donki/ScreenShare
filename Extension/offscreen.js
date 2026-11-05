@@ -15,11 +15,12 @@ let audioContext = null;
 let writable = null;
 let opfsName = null;
 let writes = Promise.resolve();
+let limitTimer = null;
 
 // Tasa de vídeo como en la aplicación: unos 0,065 bits por píxel.
 const videoBits = (w, h, fps) => Math.round(w * h * fps * 0.065);
 
-async function start({ streamId, resolution, fps, keepSound }) {
+async function start({ streamId, resolution, fps, keepSound, limit }) {
   const [width, height] = SIZES[resolution] ?? SIZES[1080];
   const source = { chromeMediaSource: "tab", chromeMediaSourceId: streamId };
   stream = await navigator.mediaDevices.getUserMedia({
@@ -49,6 +50,8 @@ async function start({ streamId, resolution, fps, keepSound }) {
   stream.getVideoTracks()[0].onended = () => recorder?.state === "recording" && recorder.stop();
   await untilFluent();
   recorder.start(2000);
+  if (limit > 0)
+    limitTimer = setTimeout(() => recorder?.state === "recording" && recorder.stop(), limit * 1000);
   return { extension };
 }
 
@@ -78,6 +81,7 @@ function untilFluent(maxMs = 5000) {
 }
 
 function release() {
+  clearTimeout(limitTimer);
   stream?.getTracks().forEach((t) => t.stop());
   audioContext?.close();
   stream = recorder = audioContext = null;

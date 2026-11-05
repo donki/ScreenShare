@@ -237,6 +237,15 @@
                         <TextBlock x:Name="EstimateText" Style="{StaticResource HintText}" Margin="0,6,0,0" AutomationProperties.AutomationId="EstimateText" />
                         <CheckBox x:Name="CursorCheck" Style="{StaticResource Check}" Content="{loc:T ShowCursor}" Margin="0,12,0,0" Checked="OnOptionChanged" Unchecked="OnOptionChanged" />
                         <CheckBox x:Name="HideCheck" Style="{StaticResource Check}" Content="{loc:T HideWhileRecording}" Checked="OnOptionChanged" Unchecked="OnOptionChanged" />
+                        <TextBlock Text="{loc:T LimitLabel}" Style="{StaticResource FieldLabel}" />
+                        <StackPanel Orientation="Horizontal">
+                            <TextBox x:Name="LimitHours" Style="{StaticResource Field}" Width="52" TextAlignment="Center" MaxLength="2" InputMethod.IsInputMethodEnabled="False" PreviewTextInput="OnLimitInput" TextChanged="OnLimitChanged" LostFocus="OnLimitLostFocus" ToolTip="{loc:T LimitHours}" AutomationProperties.Name="{loc:T LimitHours}" AutomationProperties.AutomationId="LimitHours" />
+                            <TextBlock Text=":" Style="{StaticResource BodyText}" VerticalAlignment="Center" Margin="6,0" />
+                            <TextBox x:Name="LimitMinutes" Style="{StaticResource Field}" Width="52" TextAlignment="Center" MaxLength="2" InputMethod.IsInputMethodEnabled="False" PreviewTextInput="OnLimitInput" TextChanged="OnLimitChanged" LostFocus="OnLimitLostFocus" ToolTip="{loc:T LimitMinutes}" AutomationProperties.Name="{loc:T LimitMinutes}" AutomationProperties.AutomationId="LimitMinutes" />
+                            <TextBlock Text=":" Style="{StaticResource BodyText}" VerticalAlignment="Center" Margin="6,0" />
+                            <TextBox x:Name="LimitSeconds" Style="{StaticResource Field}" Width="52" TextAlignment="Center" MaxLength="2" InputMethod.IsInputMethodEnabled="False" PreviewTextInput="OnLimitInput" TextChanged="OnLimitChanged" LostFocus="OnLimitLostFocus" ToolTip="{loc:T LimitSeconds}" AutomationProperties.Name="{loc:T LimitSeconds}" AutomationProperties.AutomationId="LimitSeconds" />
+                        </StackPanel>
+                        <TextBlock x:Name="LimitHint" Style="{StaticResource HintText}" Margin="0,6,0,0" AutomationProperties.AutomationId="LimitHint" />
                     </StackPanel>
                 </Border>
 

@@ -57,6 +57,8 @@ Con su **extensión**, graba **una pestaña del navegador** aunque esté detrás
   al reloj al empezar y al acabar. La detección usa `SetWinEventHook` (sin sondeo) en un hilo propio.
   Con la grabación automática encendida, cerrar la ventana la deja junto al reloj; se puede
   **arrancar con Windows** (`HKCU\…\Run`, solo desde la versión publicada, nunca un Debug).
+- **Duración**: casillas de horas, minutos y segundos para que la grabación se pare y se guarde sola. Por
+  defecto, sin límite. Las pausas no cuentan y no afecta a la grabación automática.
 - Carpeta de destino elegible y recordada (por defecto `Vídeos\ScreenShare`), nombre con fecha y hora
   (`Grabación 2026-10-12 15.30.05.mp4`), ajustes en JSON, español e inglés, tema claro y oscuro
   siguiendo a Windows, guía de configuración, novedades y «Acerca de».
@@ -73,6 +75,7 @@ la **extensión** de `Extension/`, para Edge y otros navegadores Chromium (versi
 - **«Vídeo a toda la pestaña»**: el vídeo más grande de la página ocupa toda la imagen. Al acabar, la
   página vuelve a como estaba. También vale el botón de pantalla completa del propio reproductor:
   mientras se graba, se queda dentro de la pestaña aunque se cambie a otra.
+- Duración opcional en horas, minutos y segundos (por defecto, sin límite): se para y se guarda sola.
 - Resolución de 720p a 2160p y 24, 30 o 60 imágenes/s. Se guarda en `Descargas\ScreenShare`. Si se
   cierra la pestaña, se guarda lo grabado hasta entonces.
 - **Los vídeos con protección anticopia salen en negro**: el navegador no los entrega y no se esquiva.

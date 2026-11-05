@@ -1,5 +1,19 @@
 # Changelog — sOC ScreenShare
 
+## 2026.11.5.1 — Duración de la grabación · Recording length
+
+**Español**
+
+- **Casillas de horas, minutos y segundos** para decidir cuánto dura una grabación: al llegar, se para y se
+  guarda sola. Por defecto, sin límite. Las pausas no cuentan y no afecta a la grabación automática.
+- La extensión del navegador tiene las mismas casillas.
+
+**English**
+
+- **Hours, minutes and seconds boxes** to decide how long a recording lasts: when it gets there, it stops and
+  saves by itself. By default, no limit. Pauses do not count and automatic recording is not affected.
+- The browser extension has the same boxes.
+
 ## Extensión 2026.11.5.0 — Grabar una pestaña · Record a tab
 
 **Español**

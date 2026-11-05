@@ -17,6 +17,12 @@
     <label class="row"><span data-i18n="fps"></span>
       <select id="fps"><option>24</option><option>30</option><option>60</option></select>
     </label>
+    <div class="row"><span data-i18n="limit"></span>
+      <span class="limit">
+        <input type="number" id="hours" min="0" max="99" data-i18n-title="limitHours">:<input type="number" id="minutes" min="0" max="59" data-i18n-title="limitMinutes">:<input type="number" id="seconds" min="0" max="59" data-i18n-title="limitSeconds">
+      </span>
+    </div>
+    <p id="limitHint"></p>
     <label class="check"><input type="checkbox" id="fill"><span data-i18n="fill"></span></label>
     <label class="check"><input type="checkbox" id="keepSound"><span data-i18n="keepSound"></span></label>
     <p data-i18n="hint"></p>

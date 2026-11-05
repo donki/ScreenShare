@@ -21,12 +21,17 @@ public sealed class RecordingController
     private readonly Dispatcher _ui;
     private readonly DispatcherTimer _tick;
     private Recorder? _recorder;
+    private int _limitSeconds;
 
     public RecordingController(Dispatcher ui)
     {
         _ui = ui;
         _tick = new DispatcherTimer(DispatcherPriority.Background, ui) { Interval = TimeSpan.FromMilliseconds(250) };
-        _tick.Tick += (_, _) => Tick?.Invoke();
+        _tick.Tick += (_, _) =>
+        {
+            Tick?.Invoke();
+            StopAtLimit();
+        };
         Machine.Changed += _ => _ui.BeginInvoke(() => StateChanged?.Invoke());
     }
 
@@ -65,6 +70,8 @@ public sealed class RecordingController
         if (!Machine.TryStart())
             return;
         IsAutomatic = automatic;
+        // La grabación automática acaba cuando lo dice su regla, no aquí.
+        _limitSeconds = automatic ? 0 : settings.MaxRecordingSeconds;
         try
         {
             var request = BuildRequest(settings, selection);
@@ -84,6 +91,15 @@ public sealed class RecordingController
             AppLog.Write($"no se pudo empezar a grabar: {ex}");
             Error?.Invoke(Loc.Get("ErrorTitle"), Text(key, arg ?? AppLog.FilePath));
         }
+    }
+
+    private async void StopAtLimit()
+    {
+        if (!RecordingLimit.Reached(Elapsed, _limitSeconds) || !Machine.CanStop)
+            return;
+        _limitSeconds = 0;
+        Notice?.Invoke(Loc.Get("NoticeLimitReached"));
+        await StopAsync();
     }
 
     /// <summary>De los ajustes y lo elegido a la petición del motor. Lanza <see cref="RecorderException"/> si falta algo.</summary>

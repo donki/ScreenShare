@@ -51,7 +51,7 @@ async function setFill(tabId, on) {
   }
 }
 
-async function start({ tabId, resolution, fps, keepSound, fill }) {
+async function start({ tabId, resolution, fps, keepSound, fill, limit }) {
   if (await getState())
     throw new Error("busy");
   const streamId = await chrome.tabCapture.getMediaStreamId({ targetTabId: tabId });
@@ -60,7 +60,7 @@ async function start({ tabId, resolution, fps, keepSound, fill }) {
     await setFill(tabId, true);
   const tab = await chrome.tabs.get(tabId);
   const reply = await chrome.runtime.sendMessage({
-    target: "offscreen", cmd: "start", streamId, resolution, fps, keepSound,
+    target: "offscreen", cmd: "start", streamId, resolution, fps, keepSound, limit,
   });
   if (!reply?.ok) {
     if (fill)

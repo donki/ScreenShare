@@ -12,6 +12,7 @@ MUTE = "--mute-tab" in sys.argv
 DELANTE = "--delante" in sys.argv
 FILL = "--fill" in sys.argv
 CERRAR = "--cerrar" in sys.argv
+LIMITE = 4 if "--limite" in sys.argv else 0
 
 
 def servir():
@@ -38,7 +39,7 @@ async def main():
             if FILL:
                 fuente = await sw.evaluate("() => fillTab.toString()")
                 await tab.evaluate(f"({fuente})(true)")
-            r = await sw.evaluate("""async (tabId) => { try { await start({tabId, resolution:'1080', fps:30, keepSound:false, fill:false}); return 'ok' } catch(e){ return String(e) } }""", tab_id)
+            r = await sw.evaluate("""async (tabId) => { try { await start({tabId, resolution:'1080', fps:30, keepSound:false, fill:false, limit:%d}); return 'ok' } catch(e){ return String(e) } }""" % LIMITE, tab_id)
             print("start:", r)
             print("audio de la pagina:", await tab.evaluate("a.state"))
             if MUTE:
@@ -51,7 +52,9 @@ async def main():
             print("pestaña detrás:", await tab.evaluate("document.visibilityState"))
             await asyncio.sleep(SEG)
             print("sigue:", await tab.evaluate("document.visibilityState"))
-            if CERRAR:
+            if LIMITE:
+                pass  # se para sola
+            elif CERRAR:
                 await tab.close()
             else:
                 await sw.evaluate("() => chrome.runtime.sendMessage({target:'offscreen',cmd:'stop'})")

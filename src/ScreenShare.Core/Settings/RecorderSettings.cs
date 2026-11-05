@@ -64,6 +64,9 @@ public sealed class RecorderSettings
     public bool ShowCursor { get; set; } = true;
     public bool HideWhileRecording { get; set; } = true;
 
+    /// <summary>Cuánto debe durar una grabación empezada a mano, en segundos; 0 = sin límite.</summary>
+    public int MaxRecordingSeconds { get; set; }
+
     public SystemAudioMode SystemAudio { get; set; } = SystemAudioMode.All;
     /// <summary>Dispositivo de salida; null = el predeterminado de Windows en cada grabación.</summary>
     public string? OutputDeviceId { get; set; }
@@ -147,6 +150,7 @@ public sealed class RecorderSettings
         if (Quality != QualityPreset.Custom)
             CustomQuality = QualityOptions.ForPreset(Quality);
         if (!Enum.IsDefined(SystemAudio)) SystemAudio = SystemAudioMode.All;
+        MaxRecordingSeconds = Math.Clamp(MaxRecordingSeconds, 0, RecordingLimit.MaxSeconds);
         SystemVolume = Math.Clamp(SystemVolume, 0, 100);
         MicVolume = Math.Clamp(MicVolume, 0, 100);
         WindowVolume = Math.Clamp(WindowVolume, 0, 100);

@@ -1,5 +1,15 @@
 [
   {
+    "version": "2026.11.5.1",
+    "date": "2026-11-05",
+    "es": [
+      "Casillas de horas, minutos y segundos para decidir cuánto dura una grabación: al llegar, se para y se guarda sola. Por defecto, sin límite."
+    ],
+    "en": [
+      "Hours, minutes and seconds boxes to decide how long a recording lasts: when it gets there, it stops and saves by itself. By default, no limit."
+    ]
+  },
+  {
     "version": "2026.11.5.0",
     "date": "2026-11-05",
     "es": [

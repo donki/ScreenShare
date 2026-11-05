@@ -81,6 +81,7 @@ public partial class MainWindow : Window
         MicCheck.IsChecked = _s.MicEnabled;
         CursorCheck.IsChecked = _s.ShowCursor;
         HideCheck.IsChecked = _s.HideWhileRecording;
+        ShowLimit();
         FolderBox.Text = _s.OutputFolder;
         AutoRecordCheck.IsChecked = _s.AutoRecordEnabled;
         StartupCheck.IsEnabled = WindowsStartup.IsAvailable;
@@ -145,6 +146,35 @@ public partial class MainWindow : Window
             RefreshWindows();
         UpdateEstimate();
     }
+
+    private void ShowLimit()
+    {
+        var was = _loading;
+        _loading = true;
+        var (hours, minutes, seconds) = RecordingLimit.Split(_s.MaxRecordingSeconds);
+        LimitHours.Text = hours.ToString("00", CultureInfo.InvariantCulture);
+        LimitMinutes.Text = minutes.ToString("00", CultureInfo.InvariantCulture);
+        LimitSeconds.Text = seconds.ToString("00", CultureInfo.InvariantCulture);
+        _loading = was;
+        ShowLimitHint();
+    }
+
+    private void ShowLimitHint() => LimitHint.Text = _s.MaxRecordingSeconds == 0
+        ? Loc.Get("LimitNone")
+        : Loc.Format("LimitHint", RecordingLimit.Format(_s.MaxRecordingSeconds));
+
+    private void OnLimitInput(object sender, TextCompositionEventArgs e) => e.Handled = !e.Text.All(char.IsAsciiDigit);
+
+    private void OnLimitChanged(object sender, TextChangedEventArgs e)
+    {
+        if (_loading)
+            return;
+        _s.MaxRecordingSeconds = RecordingLimit.ToSeconds(LimitHours.Text, LimitMinutes.Text, LimitSeconds.Text);
+        Save();
+        ShowLimitHint();
+    }
+
+    private void OnLimitLostFocus(object sender, RoutedEventArgs e) => ShowLimit();
 
     private void RefreshMonitorsIfChanged()
     {
