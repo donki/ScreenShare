@@ -7,3 +7,4 @@ cobertura/
 artifacts/
 *.log
 publish/
+*_wpftmp.csproj
